@@ -1,0 +1,129 @@
+// vim:foldmethod=marker:foldlevel=0
+{
+    "clangd.arguments": ["--enable-config"],
+    "clangd.fallbackFlags": [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fstrict-aliasing",
+        "-Wuninitialized",
+        "-Winit-self",
+        "-Wshadow",
+        "-Wcast-align",
+        "-Wstrict-overflow=5",
+        "-Wwrite-strings",
+        "-Wcast-qual",
+        "-Wswitch-enum",
+        "-Wl,-z,defs"
+    ],
+    "diagnostic-languageserver.filetypes": {
+        "vim": "vint",
+        "sh": "shellcheck"
+    },
+    "python.linting.flake8Enabled": true,
+    "inlayHint.enable": false,
+    "json.schemas": [{
+// Json Schemas {{{
+        "name": "Wayward Game Mod Schema",
+        "fileMatch": [ "waywardgame/*/mod.json" ],
+        "url": "https://raw.githubusercontent.com/WaywardGame/wayward-schemas/master/schema/mod.schema.json"
+    },
+    {
+        "name": "Wayward Game Mod Customizations Schema",
+        "fileMatch": [ "waywardgame/*/customizations.json" ],
+        "url": "https://raw.githubusercontent.com/WaywardGame/wayward-schemas/blob/master/schema/customizations.schema.json"
+    },
+    {
+        "name": "Wayward Game Mod imageOverrides Schema",
+        "fileMatch": [ "waywardgame/*/imageOverrides.json" ],
+        "url": "https://raw.githubusercontent.com/WaywardGame/wayward-schemas/blob/master/schema/imageOverrides.schema.json"
+    },
+    {
+        "name": "Wayward Game Mod Languages Schema",
+        "fileMatch": [ "waywardgame/*/lang/*.json" ],
+        "url": "https://raw.githubusercontent.com/WaywardGame/wayward-schemas/blob/master/schema/lang.schema.json"
+// }}}
+    }],
+    "clangd.path": "~/.config/coc/extensions/coc-clangd-data/install/14.0.3/clangd_14.0.3/bin/clangd",
+    // run eslint at every file save
+    "eslint.run": "onSave",
+    "eslint.useESLintClass": true,
+  // run eslint in these languages
+    "eslint.validate": ["javascript", "typescript", "javascriptreact", "typescriptreact", "html"],
+    "eslint.options": {
+      "overrideConfig": {
+          "extends": [ "eslint:recommended" ],
+          "plugins": [ ],
+          "parserOptions": {
+              "ecmaVersion": "latest",
+              "ecmaFeatures": {
+                  // imply "use strict";
+                  "impliedStrict": true
+              }
+          },
+         "rules": {
+// core rules {{{
+            "prefer-template": "warn",
+            "no-duplicate-imports": "warn",
+            "no-self-compare": "warn",
+            "arrow-body-style": "warn",
+            "curly": "warn",
+            "prefer-object-has-own": "warn",
+            "prefer-exponentiation-operator": "warn",
+            "default-case-last": "warn",
+            "dot-notation": "warn",
+            "no-inline-comments": "warn",
+            "max-depth": ["error", 2],
+            "object-shorthand": ["error", "never"],
+            "prefer-regex-literals": "error",
+            "guard-for-in": "error",
+            "prefer-rest-params": "error",
+            "eqeqeq": "error",
+            "radix": "error",
+            "vars-on-top": "error",
+            "require-await": "error",
+            "new-cap": "error",
+            "no-new": "error",
+            "no-void": "error",
+            "no-shadow": "error",
+            "no-undef-init": "error",
+            "no-useless-call": "error",
+            "no-useless-concat": "error",
+            "no-var": "error",
+            "no-useless-constructor": "error",
+            "no-unused-expressions": "error",
+            "no-undefined": "error",
+            "no-throw-literal": "error",
+            "no-sequences": "error",
+            "no-script-url": "error",
+            "no-proto": "error",
+            "no-plusplus": "error",
+            "no-octal-escape": "error",
+            "no-new-func": "error",
+            "no-new-object": "error",
+            "no-new-wrappers": "error",
+            "no-bitwise": "error",
+            "no-nested-ternary": "error",
+            "no-multi-str": "error",
+            "no-eq-null": "error",
+            "no-eval": "error",
+            "no-mixed-operators": "error",
+            "no-loop-func": "error",
+            "no-lonely-if": "error",
+            "no-lone-blocks": "error",
+            "no-label-var": "error",
+            "no-invalid-this": "error",
+            "no-implied-eval": "error",
+            "no-implicit-globals": "error",
+            "no-implicit-coercion": "error",
+            "no-array-constructor": "error",
+            "multiline-comment-style": ["error", "separate-lines"],
+            "no-new-native-nonconstructor": "error",
+            "no-unused-private-class-members": "error",
+            "no-use-before-define": "error",
+            "require-atomic-updates": "error",
+// }}}
+         }
+      }
+  }
+}
