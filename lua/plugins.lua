@@ -29,6 +29,8 @@ require('packer').startup(function()
     -- website: https://github.com/ellisonleao/gruvbox.nvim
     use { 'ellisonleao/gruvbox.nvim' }
 
+    -- fast and beautiful statusline
+    -- website: https://github.com/nvim-lualine/lualine.nvim
     use { 'nvim-lualine/lualine.nvim',
             requires = { 'kyazdani42/nvim-web-devicons', opt = true }
         }

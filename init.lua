@@ -15,10 +15,7 @@ require('colors').colorscheme('gruvbox', function()
     -- use custom_highlight() here to change any highlighting
     --
 end)
+require('statusline').setup('jellybeans')
 require('settings').set_sensible() -- first setup the plugins
 require('abbrev')
 require('mappings')
-
---local au = vim.api.nvim_create_autocmd
-
---au({'BufNewFile', pattern={'*.c', '*.h'}, callback=require('ftplugin.c').bufnewfile_callback})
