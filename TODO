@@ -1,0 +1,16 @@
+* Set vim.o.background = dark at require('colors').colorscheme.
+  Maybe like this:
+  require('colors').colorscheme('gruvbox', function()
+  	vim.o.background = 'dark'
+  end)
+* setup new keymaps (or just stick with the defaults) of the treesiter
+  incremental selection. This is set at plugins/plugins.lua
+* check new treesitter modules: https://github.com/nvim-treesitter/nvim-treesitter/wiki/Extra-modules-and-plugins
+* Customize CoC
+     -- Highlight the symbol and its references when holding the cursor
+     autocmd {'CursorHold', '*', 'call CocActionAsync("highlight")'}
+* customize vim-surround
+* make a popup when something updates
+* change the color of the border of the notification
+* center the text of the notification
+* investigate segfault that sometimes occur

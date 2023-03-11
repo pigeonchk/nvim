@@ -1,0 +1,2 @@
+## FZF @files
+Choose a file from the current project | <leader>fzf
