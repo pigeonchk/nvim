@@ -19,3 +19,5 @@ require('statusline').setup('jellybeans')
 require('settings').set_sensible() -- first setup the plugins
 require('abbrev')
 require('mappings')
+
+require('notice')
