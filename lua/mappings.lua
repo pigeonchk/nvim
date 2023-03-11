@@ -8,6 +8,11 @@ local tnoremap = require('viml').tnoremap
 
 vim.g.mapleader = ','
 
+-- FZF {{{1
+-- open file chooser for project files
+nnoremap('<leader>fzf', ':CocCommand fzf-preview.ProjectFiles<CR>')
+-- }}}
+
 -- Moving {{{1
 
 -- using ALT+<key> to change the window

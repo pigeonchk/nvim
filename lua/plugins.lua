@@ -95,6 +95,8 @@ require('packer').startup(function()
     -- Coc (Conquer of Completions) {{{1
     use {'neoclide/coc.nvim', branch = 'release'}
     g.coc_global_extensions = {
+        -- website: https://github.com/yuki-yano/fzf-preview.vim
+        'coc-fzf-preview'
     }
     -- }}}
 
@@ -114,9 +116,32 @@ require('packer').startup(function()
     -- website: https://github.com/tommcdo/vim-lion
     use 'tommcdo/vim-lion'
 
+    -- I don't use the regular :FZF command of the fzf.vim plugin but instead
+    -- use the fzf-preview, which is installed using coc.
+    --
     -- website (lspfuzzy): https://github.com/ojroques/nvim-lspfuzzy
     -- website (FZF): https://github.com/junegunn/fzf
+    -- website (FZF.vim): https://github.com/junegunn/fzf.vim
     use {'ojroques/nvim-lspfuzzy', requires = {{'junegunn/fzf'}, {'junegunn/fzf.vim'}}}
+
+    -- helps me keep track of all my bindings because I have a very bad memory
+    -- website: https://github.com/sudormrfbin/cheatsheet.nvim
+    use { 'sudormrfbin/cheatsheet.nvim',
+          requires = {
+            -- website: https://github.com/nvim-telescope/telescope.nvim
+            {'nvim-telescope/telescope.nvim'},
+            -- website: https://github.com/nvim-lua/popup.nvim
+            {'nvim-lua/popup.nvim'},
+            -- website: https://github.com/nvim-lua/plenary.nvim
+            {'nvim-lua/plenary.nvim'},
+          }
+    }
+
+    -- remove all but the 'default' cheatsheets
+    require('cheatsheet').setup {
+        bundled_cheatsheets =  { 'default' },
+        bundled_plugin_cheatsheets = false,
+    }
 
     -- Automatically set up your configuration after cloning packer.nvim
     if packer_bootstrap then
