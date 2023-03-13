@@ -20,4 +20,5 @@ require('settings').set_sensible() -- first setup the plugins
 require('abbrev')
 require('mappings')
 
-require('notice')
+-- this is my custom notification system
+require('notice').setup { }

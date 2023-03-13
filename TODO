@@ -11,6 +11,6 @@
      autocmd {'CursorHold', '*', 'call CocActionAsync("highlight")'}
 * customize vim-surround
 * make a popup when something updates
-* change the color of the border of the notification
-* center the text of the notification
 * investigate segfault that sometimes occur
+* put a column as a marker at the 100th (adjustable) column
+* implement a visual/audio bell when a notification pops up
