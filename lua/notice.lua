@@ -68,7 +68,9 @@ local NOTIFY_DEFAULT_BORDER_COLOR = '#6ea2dd'
 local NOTIFY_DEFAULT_LINE_BREAKAT = ' ,.;:=+'
 local NOTIFY_DEFAULT_WORDBREAK_CHAR = '~'
 
-local CONFIG = { }
+local CONFIG = {
+    -- notify_line_breakat = NOTIFY_DEFAULT_LINE_BREAKAT
+}
 
 local M = { }
 
@@ -170,10 +172,14 @@ function M.notify(what, time)
     end
 
     if type(what) ~= 'table' then
-        error('notice.setup: \'options\' is the wrong type: received \''
-              ..type(options)..'\', required: \'table\'')
+        error('notice.setup: \'what\' is the wrong type: received \''
+              ..type(what)..'\', required: \'table\'')
     end
 
+    if type(time) ~= 'number' then
+        error('notice.setup: \'time\' is the wrong type: received \''
+              ..type(time)..'\', required: \'number\'')
+    end
 
     local width = NOTIFY_DEFAULT_WIDTH
     local height = #what
@@ -372,7 +378,7 @@ function M.notify(what, time)
         title = NOTIFY_DEFAULT_TITLE,
         wrap = true,
         padding = NOTIFY_DEFAULT_PADDING,
-        --time = time or NOTIFY_DEFAULT_TIME,
+        time = time or NOTIFY_DEFAULT_TIME,
         border = true,
         borderhighlight = NOTIFY_DEFAULT_BORDERHIGHLIGHT,
         borderchars = BORDER_DEFAULT_CHARACTERS,
