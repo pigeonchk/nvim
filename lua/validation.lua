@@ -35,7 +35,7 @@ function M.validate(tbl, spec)
               "received '"..type(spec).."', expected 'table'")
     end
 
-    function pretty_tbl(type_of_val, tbl, _lines)
+    function tbl_to_str(type_of_val, tbl, _lines)
 
         local line  = { }
 
@@ -55,7 +55,7 @@ function M.validate(tbl, spec)
         end
         for _, v in ipairs(tbl) do
             if type(v) == 'table' then
-                table.insert(_lines, pretty_tbl(v[1], v[2], _lines))
+                table.insert(_lines, tbl_to_str(v[1], v[2], _lines))
             end
         end
 
@@ -67,7 +67,6 @@ function M.validate(tbl, spec)
         return fullstring
     end
 
-
     function check_type(requested, got, key)
         if type(requested) == 'string' then
             if requested ~= got then
@@ -75,8 +74,8 @@ function M.validate(tbl, spec)
             end
         elseif type(requested) == 'table' then
             for _, tp in ipairs(requested) do
-                if not check_type(tp, got, key) then
-                    return false
+                if check_type(tp, got, key) then
+                    return true
                 end
             end
         else
@@ -122,15 +121,25 @@ function M.validate(tbl, spec)
 
         local type_of_val = type(tbl[k])
         if v.type and tbl[k] ~= nil and not check_type(v.type, type_of_val, k) then
+            local expected_type
+            if type(v.type) == 'table' then
+                local l = { }
+                for _,tp in ipairs(v.type) do
+                    table.insert(l, "'"..tp.."'")
+                end
+                expected_type = table.concat(l, ' or ')
+            else
+                expected_type = "'"..v.type.."'"
+            end
             error(caller..": argument '"..k.."' is the wrong type: "..
-                  "received '"..type_of_val.."', expected '"..v.type.."'")
+                  "received '"..type_of_val.."', expected "..expected_type)
         end
 
         if v.expects and tbl[k] ~= nil then
             if not check_expected(v.expects, tbl[k], k, type_of_val) then
                 error(caller..": argument '"..k.."' has the wrong value: "..
                       "received '"..tbl[k].."', expected "
-                      ..pretty_tbl(type_of_val, v.expects))
+                      ..tbl_to_str(type_of_val, v.expects))
             end
         end
     end
