@@ -59,9 +59,9 @@ local BORDER_DEFAULT_CHARACTERS = {'─', '│', '─', '│', '╭', '╮', '�
 
 local NOTIFY_DEFAULT_PADDING = { 0, 0, 0, 0 }
 local NOTIFY_DEFAULT_TIME = 5000 -- 5 seconds
-local NOTIFY_DEFAULT_TITLE = 'notification'
-local NOTIFY_DEFAULT_RIGHT_MARGIN = 2
-local NOTIFY_DEFAULT_TOP_MARGIN = 3
+local NOTIFY_DEFAULT_TITLE = ''
+local NOTIFY_DEFAULT_RIGHT_MARGIN = 1
+local NOTIFY_DEFAULT_TOP_MARGIN = 1
 local NOTIFY_DEFAULT_WIDTH = 35
 local NOTIFY_DEFAULT_BORDERHIGHLIGHT = 'HI_GRP_NOTIFY_BORDER'
 local NOTIFY_DEFAULT_BORDER_COLOR = '#6ea2dd'
@@ -69,7 +69,10 @@ local NOTIFY_DEFAULT_LINE_BREAKAT = ' ,.;:=+'
 local NOTIFY_DEFAULT_WORDBREAK_CHAR = '~'
 
 local CONFIG = {
-    -- notify_line_breakat = NOTIFY_DEFAULT_LINE_BREAKAT
+    -- notify_line_breakat = NOTIFY_DEFAULT_LINE_BREAKAT,
+    -- notify_popup_title = NOTIFY_DEFAULT_TITLE,
+    -- notify_right_margin = NOTIFY_DEFAULT_RIGHT_MARGIN,
+    -- notify_top_margin = NOTIFY_DEFAULT_TOP_MARGIN,
 }
 
 local M = { }
@@ -83,6 +86,12 @@ local M = { }
 --                        (a string required)
 -- notify_line_breakat  - the characters to split long lines at when using
 --                        notice.notify(). expects a string.
+-- notify_popup_title   - title of the notification popup window itself. defaults
+--                        to NOTIFY_DEFAULT_TITLE. expects a string.
+-- notify_top_margin    - top margin of the popup window. default to
+--                        NOTIFY_DEFAULT_TOP_MARGIN. expects a number.
+-- notify_right_margin  - right margin of the popup window. default to
+--                        NOTIFY_DEFAULT_RIGHT_MARGIN. expects a number.
 function M.setup(options)
     if options and type(options) ~= 'table' then
         error('notice.setup: \'options\' is the wrong type: received \''
@@ -106,6 +115,9 @@ function M.setup(options)
     vim.api.nvim_set_hl(0, NOTIFY_DEFAULT_BORDERHIGHLIGHT, notify_border_hl)
 
     CONFIG.notify_line_breakat = options.notify_line_breakat or NOTIFY_DEFAULT_LINE_BREAKAT
+    CONFIG.notify_popup_title = options.notify_popup_title or NOTIFY_DEFAULT_TITLE
+    CONFIG.notify_right_margin = options.notify_right_margin or NOTIFY_DEFAULT_RIGHT_MARGIN
+    CONFIG.notify_top_margin = options.notify_top_margin or NOTIFY_DEFAULT_TOP_MARGIN
 end
 
 -- this function wraps around the popup.create() function to
@@ -166,23 +178,21 @@ function M.popup_create(what, _vim_options)
 end
 
 function M.notify(what, time)
-
     if not what then
         error("notice.notify: argument required: 'what' (a string or a list of strings)")
     end
 
-    if type(what) ~= 'table' then
+    if type(what) ~= 'table' and type(what) ~= 'string' then
         error('notice.setup: \'what\' is the wrong type: received \''
-              ..type(what)..'\', required: \'table\'')
+              ..type(what)..'\', required: \'table\' or \'string\'')
     end
 
-    if type(time) ~= 'number' then
+    if time and type(time) ~= 'number' then
         error('notice.setup: \'time\' is the wrong type: received \''
               ..type(time)..'\', required: \'number\'')
     end
 
     local width = NOTIFY_DEFAULT_WIDTH
-    local height = #what
 
     -- going into their own function cause of deep nesting issues
     local process_word = function(arg_tbl, word)
@@ -338,33 +348,39 @@ function M.notify(what, time)
 
     local lines = center_lines(what, width)
 
+    local height = #lines
     -- the anchor is in the north-west, so we need to calculate:
     --
     -- for column:
-    --      col = max_column - NOTIFY_DEFAULT_RIGHT_MARGIN - width - border_thickness.right
+    --      col = max_column - RIGHT_MARGIN - width - border_thickness.right
     --
     -- for row:
-    --     check if height + border_thickness.top + NOTIFY_DEFAULT_TOP_MARGIN > max_row
+    --     check if height + border_thickness.top + TOP_MARGIN <= max_row
     --     if true:
-    --         row = NOTIFY_DEFAULT_TOP_MARGIN + border_thickness.top
+    --         row = border_thickness.top + TOP_MARGIN + 1
     local calculate_position = function(width, height)
+        local RIGHT_MARGIN = CONFIG.notify_right_margin
+        local TOP_MARGIN = CONFIG.notify_top_margin
         local border_thickness = require('plenary.window.border')._default_thickness
         local max_column = vim.go.columns
 
-        local total_width = NOTIFY_DEFAULT_RIGHT_MARGIN + width + border_thickness.right
+        local total_width = RIGHT_MARGIN + width + border_thickness.right
         if max_column < total_width then
             error('notice.notify: could not create notification: window width too small')
         end
         local col = max_column - total_width
 
         local max_row = vim.o.lines
-        local total_height = NOTIFY_DEFAULT_TOP_MARGIN + border_thickness.top + height
+        local total_height = TOP_MARGIN + border_thickness.top + height
         if max_row < total_height then
             error('notice.notify: could not create notification: window height too small')
         end
 
-        local row = NOTIFY_DEFAULT_RIGHT_MARGIN + border_thickness.top
-
+        -- the windows is positioned such that the first line of the windows that is not
+        -- a border will be the the row you specified. So in addition to the TOP_MARGIN
+        -- and border_thickness.top, we need to add one to skip that line. That way, we
+        -- get TOP_MARGIN of space.
+        local row = TOP_MARGIN + border_thickness.top + 1
         vim.b.position = {col, row, max_column, total_width, max_row, total_height}
         return {col, row}
     end
@@ -375,10 +391,10 @@ function M.notify(what, time)
         width = width,
         col = col,
         line = row,
-        title = NOTIFY_DEFAULT_TITLE,
+        title = CONFIG.notify_popup_title,
         wrap = true,
         padding = NOTIFY_DEFAULT_PADDING,
-        time = time or NOTIFY_DEFAULT_TIME,
+        --time = time or NOTIFY_DEFAULT_TIME,
         border = true,
         borderhighlight = NOTIFY_DEFAULT_BORDERHIGHLIGHT,
         borderchars = BORDER_DEFAULT_CHARACTERS,
