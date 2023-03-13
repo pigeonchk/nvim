@@ -13,4 +13,7 @@
 * make a popup when something updates
 * investigate segfault that sometimes occur
 * put a column as a marker at the 100th (adjustable) column
-* implement a visual/audio bell when a notification pops up
+* add animations to the notification popup
+* add loading animations to the notification popup
+* add support for multiple notifications at the same time
+* add support to select either centering or left alignment in the notification API

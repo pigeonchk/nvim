@@ -52,27 +52,45 @@
 local popup = require('plenary.popup')
 local re_gmatch = require('re').re_gmatch
 
-local TEXT_HIGHLIGHT_GROUP_NAME = "HI_GRP_POPUP_NOTICE_TEXT"
+local TEXT_HIGHLIGHT_GROUP_NAME   = "HI_GRP_POPUP_NOTICE_TEXT"
 local BORDER_HIGHLIGHT_GROUP_NAME = "HI_GRP_POPUP_NOTICE_BORDER"
-local POPUP_BORDER_COLOR = '#595959'
-local BORDER_DEFAULT_CHARACTERS = {'─', '│', '─', '│', '╭', '╮', '╯', '╰'}
+local POPUP_BORDER_COLOR          = '#595959'
+local BORDER_DEFAULT_CHARACTERS   = {'─', '│', '─', '│', '╭', '╮', '╯', '╰'}
 
-local NOTIFY_DEFAULT_PADDING = { 0, 0, 0, 0 }
-local NOTIFY_DEFAULT_TIME = 5000 -- 5 seconds
-local NOTIFY_DEFAULT_TITLE = ''
-local NOTIFY_DEFAULT_RIGHT_MARGIN = 1
-local NOTIFY_DEFAULT_TOP_MARGIN = 1
-local NOTIFY_DEFAULT_WIDTH = 35
-local NOTIFY_DEFAULT_BORDERHIGHLIGHT = 'HI_GRP_NOTIFY_BORDER'
-local NOTIFY_DEFAULT_BORDER_COLOR = '#6ea2dd'
-local NOTIFY_DEFAULT_LINE_BREAKAT = ' ,.;:=+'
-local NOTIFY_DEFAULT_WORDBREAK_CHAR = '~'
+local NOTIFY_DEFAULT_PADDING         = { 0, 0, 0, 0 }
+local NOTIFY_DEFAULT_TIME            = 5000 -- 5 seconds
+local NOTIFY_DEFAULT_TITLE           = ''
+local NOTIFY_DEFAULT_RIGHT_MARGIN    = 1
+local NOTIFY_DEFAULT_TOP_MARGIN      = 1
+local NOTIFY_DEFAULT_WIDTH           = 35
+local NOTIFY_DEFAULT_LINE_BREAKAT    = ' ,.;:=+'
+local NOTIFY_DEFAULT_WORDBREAK_CHAR  = '~'
+local NOTIFY_DEFAULT_ICONS           = {'', '', '', ''} -- info, success, failure, warning
+local NOTIFY_DEFAULT_BORDER_COLORS   = {
+    '#6ea2dd', -- info
+    '#8ec07c', -- success
+    '#fb4934', -- failure
+    '#fabd2f'  -- warning
+}
+local NOTIFY_HIGHLIGHT_GROUPS = {
+    'HI_GRP_NOTIFY_BORDER_INFO',
+    'HI_GRP_NOTIFY_BORDER_SUCCESS',
+    'HI_GRP_NOTIFY_BORDER_FAILURE',
+    'HI_GRP_NOTIFY_BORDER_WARNING',
+}
+
+
+local INFO      = 1
+local SUCCESS   = 2
+local FAILURE   = 3
+local WARNING   = 4
 
 local CONFIG = {
     -- notify_line_breakat = NOTIFY_DEFAULT_LINE_BREAKAT,
     -- notify_popup_title = NOTIFY_DEFAULT_TITLE,
     -- notify_right_margin = NOTIFY_DEFAULT_RIGHT_MARGIN,
     -- notify_top_margin = NOTIFY_DEFAULT_TOP_MARGIN,
+    -- notify_icons = NOTIFY_DEFAULT_ICONS,
 }
 
 local M = { }
@@ -81,9 +99,9 @@ local M = { }
 --
 -- border_color         - the border color of popups created with popup_create().
 --                        defaults to POPUP_BORDER_COLOR. (a string required)
--- notify_border_color  - the border color of the notification created with
---                        notify(). defaults to NOTIFY_DEFAULT_BORDER_COLOR.
---                        (a string required)
+-- notify_border_colors - the border color of the notification created with
+--                        notify(). defaults to NOTIFY_DEFAULT_BORDER_COLORS.
+--                        (a table is required)
 -- notify_line_breakat  - the characters to split long lines at when using
 --                        notice.notify(). expects a string.
 -- notify_popup_title   - title of the notification popup window itself. defaults
@@ -92,32 +110,48 @@ local M = { }
 --                        NOTIFY_DEFAULT_TOP_MARGIN. expects a number.
 -- notify_right_margin  - right margin of the popup window. default to
 --                        NOTIFY_DEFAULT_RIGHT_MARGIN. expects a number.
+-- notify_icons         - the icons used when a module/plugin name is passed
+--                        to the notify() function. Must be a list of four
+--                        strings, in the format: {info, success, error, warn}
 function M.setup(options)
     if options and type(options) ~= 'table' then
         error('notice.setup: \'options\' is the wrong type: received \''
               ..type(options)..'\', required: \'table\'')
     end
-    -- use the same background as the main window
-    local normal_hl = vim.api.nvim_get_hl_by_name('Normal', true)
-    local border_hl = {}
-    local notify_border_hl = {}
 
-    for k,v in pairs(normal_hl) do
-        border_hl[k] = v
-        notify_border_hl[k] = v
+    local shallow_copy = function(tbl)
+        local tbl = {}
+        for k,v in pairs(tbl) do
+            tbl[k] = v
+        end
+        return tbl
     end
 
-    border_hl.fg = options.border_color or POPUP_BORDER_COLOR
-    notify_border_hl.fg = options.notify_border_color or NOTIFY_DEFAULT_BORDER_COLOR
-
+    -- use the same background as the main window
+    local normal_hl = vim.api.nvim_get_hl_by_name('Normal', true)
     vim.api.nvim_set_hl(0, TEXT_HIGHLIGHT_GROUP_NAME, normal_hl)
+
+    local border_hl = shallow_copy(normal_hl)
+    border_hl.fg = options.border_color or POPUP_BORDER_COLOR
     vim.api.nvim_set_hl(0, BORDER_HIGHLIGHT_GROUP_NAME, border_hl)
-    vim.api.nvim_set_hl(0, NOTIFY_DEFAULT_BORDERHIGHLIGHT, notify_border_hl)
+
+    local notify_border_hl = shallow_copy(normal_hl)
+    local colors = options.notify_border_color or NOTIFY_DEFAULT_BORDER_COLORS
+
+    notify_border_hl.fg = colors[INFO]
+    vim.api.nvim_set_hl(0, NOTIFY_HIGHLIGHT_GROUPS[INFO], notify_border_hl)
+    notify_border_hl.fg = colors[SUCCESS]
+    vim.api.nvim_set_hl(0, NOTIFY_HIGHLIGHT_GROUPS[SUCCESS], notify_border_hl)
+    notify_border_hl.fg = colors[FAILURE]
+    vim.api.nvim_set_hl(0, NOTIFY_HIGHLIGHT_GROUPS[FAILURE], notify_border_hl)
+    notify_border_hl.fg = colors[WARNING]
+    vim.api.nvim_set_hl(0, NOTIFY_HIGHLIGHT_GROUPS[WARNING], notify_border_hl)
 
     CONFIG.notify_line_breakat = options.notify_line_breakat or NOTIFY_DEFAULT_LINE_BREAKAT
     CONFIG.notify_popup_title = options.notify_popup_title or NOTIFY_DEFAULT_TITLE
     CONFIG.notify_right_margin = options.notify_right_margin or NOTIFY_DEFAULT_RIGHT_MARGIN
     CONFIG.notify_top_margin = options.notify_top_margin or NOTIFY_DEFAULT_TOP_MARGIN
+    CONFIG.notify_icons = options.notify_icons or NOTIFY_DEFAULT_ICONS
 end
 
 -- this function wraps around the popup.create() function to
@@ -177,7 +211,30 @@ function M.popup_create(what, _vim_options)
     return popup.create(what, vim_options)
 end
 
-function M.notify(what, time)
+-- options:
+--
+-- time             - time the notification will stay up
+-- module           - module/plugin name
+-- center_module    - center the module name
+-- type             - the type of the notification. can be either:
+--                  - 'information', 'success', 'failure', 'warning'.
+--                    defaults to 'information'.
+function M.notify(what, options)
+    options = options or { }
+    local notify_type = options.type or 'information'
+    local type_map = {
+        information = INFO,
+        success = SUCCESS,
+        failure = FAILURE,
+        warning = WARNING,
+    }
+    local type_to_higroup_map = {
+        information = NOTIFY_HIGHLIGHT_GROUPS[INFO],
+        success = NOTIFY_HIGHLIGHT_GROUPS[SUCCESS],
+        failure = NOTIFY_HIGHLIGHT_GROUPS[FAILURE],
+        warning = NOTIFY_HIGHLIGHT_GROUPS[WARNING],
+    }
+
     if not what then
         error("notice.notify: argument required: 'what' (a string or a list of strings)")
     end
@@ -187,6 +244,12 @@ function M.notify(what, time)
               ..type(what)..'\', required: \'table\' or \'string\'')
     end
 
+    if type(options) ~= 'table' then
+        error('notice.setup: \'options\' is the wrong type: received \''
+              ..type(options)..'\', required: \'table\'')
+    end
+
+    local time = options.time
     if time and type(time) ~= 'number' then
         error('notice.setup: \'time\' is the wrong type: received \''
               ..type(time)..'\', required: \'number\'')
@@ -305,6 +368,11 @@ function M.notify(what, time)
         return { lines, lengths }
     end
 
+    local get_alignment = function (maxlen, len)
+        local rest = maxlen - len
+        return rest == 0 and 0 or math.ceil(rest / 2)
+    end
+
     -- the algorithm to center the lines is really simple:
     --
     -- - first split any line greater than maxlen into two or more lines.
@@ -333,8 +401,7 @@ function M.notify(what, time)
         --     - divide by 2 and use math.ceil() to get the alignment.
         local alignments = {}
         for i, len in ipairs(lengths) do
-            local rest = maxlen - len
-            alignments[i] = rest == 0 and 0 or math.ceil(rest / 2)
+            alignments[i] = get_alignment(maxlen, len)
         end
 
         local centered_lines = {}
@@ -347,6 +414,21 @@ function M.notify(what, time)
     end
 
     local lines = center_lines(what, width)
+
+    local module_name = options.module
+    local module_name_linesnr
+    if module_name then
+        -- also optionally center the module name
+        -- subtract two to account for the starting space and icon
+        local spaces = ' '
+        if options.center_module then
+            spaces = string.rep(' ', get_alignment(width, #module_name) - 2)
+        end
+        local icon = CONFIG.notify_icons[type_map[notify_type]]
+        module_name = ' '..icon..spaces..module_name
+        table.insert(lines, 1, string.rep('─', width))
+        table.insert(lines, 1, module_name)
+    end
 
     local height = #lines
     -- the anchor is in the north-west, so we need to calculate:
@@ -389,6 +471,7 @@ function M.notify(what, time)
 
     local vim_options = {
         width = width,
+        maxwidth = width,
         col = col,
         line = row,
         title = CONFIG.notify_popup_title,
@@ -396,12 +479,25 @@ function M.notify(what, time)
         padding = NOTIFY_DEFAULT_PADDING,
         --time = time or NOTIFY_DEFAULT_TIME,
         border = true,
-        borderhighlight = NOTIFY_DEFAULT_BORDERHIGHLIGHT,
+        borderhighlight = type_to_higroup_map[notify_type],
         borderchars = BORDER_DEFAULT_CHARACTERS,
         highlight = TEXT_HIGHLIGHT_GROUP_NAME
     }
 
-    return popup.create(lines, vim_options)
+    -- create a non-listed scratch buffer
+    local bufnr = vim.api.nvim_create_buf(false, true)
+    if bufnr == 0 then
+        error('notice.notify: failed to create new scratch buffer')
+    end
+
+    vim.api.nvim_buf_set_lines(bufnr, 0, 1, true, lines)
+
+    if module_name then
+        vim.api.nvim_buf_add_highlight(bufnr, 0, type_to_higroup_map[notify_type], 0, 0, -1)
+        vim.api.nvim_buf_add_highlight(bufnr, 0, type_to_higroup_map[notify_type], 1, 0, -1)
+    end
+
+    return popup.create(bufnr, vim_options)
 end
 
 return M
