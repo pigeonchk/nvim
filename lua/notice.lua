@@ -49,8 +49,14 @@
 -- enter            - set the focus to the popup
 -- moved            - NOT FULLY IMPLEMENTED YET
 -- hidden           - NOT FULLY IMPLEMENTED YET
-local popup = require('plenary.popup')
-local re_gmatch = require('re').re_gmatch
+local popup         = require('plenary.popup')
+local re_gmatch     = require('re').re_gmatch
+local centerln      = require('align').centerln
+local centerln_l    = require('align').centerln_l
+local get_alignment = require('align').get_alignment
+local splitln       = require('align').splitln
+local splitln_l     = require('align').splitln_l
+local validate      = require('validation').validate
 
 local TEXT_HIGHLIGHT_GROUP_NAME   = "HI_GRP_POPUP_NOTICE_TEXT"
 local BORDER_HIGHLIGHT_GROUP_NAME = "HI_GRP_POPUP_NOTICE_BORDER"
@@ -63,8 +69,7 @@ local NOTIFY_DEFAULT_TITLE           = ''
 local NOTIFY_DEFAULT_RIGHT_MARGIN    = 1
 local NOTIFY_DEFAULT_TOP_MARGIN      = 1
 local NOTIFY_DEFAULT_WIDTH           = 35
-local NOTIFY_DEFAULT_LINE_BREAKAT    = ' ,.;:=+'
-local NOTIFY_DEFAULT_WORDBREAK_CHAR  = '~'
+local NOTIFY_DEFAULT_ALIGNMENT       = 'center'
 local NOTIFY_DEFAULT_ICONS           = {'', '', '', ''} -- info, success, failure, warning
 local NOTIFY_DEFAULT_BORDER_COLORS   = {
     '#6ea2dd', -- info
@@ -86,11 +91,11 @@ local FAILURE   = 3
 local WARNING   = 4
 
 local CONFIG = {
-    -- notify_line_breakat = NOTIFY_DEFAULT_LINE_BREAKAT,
     -- notify_popup_title = NOTIFY_DEFAULT_TITLE,
     -- notify_right_margin = NOTIFY_DEFAULT_RIGHT_MARGIN,
     -- notify_top_margin = NOTIFY_DEFAULT_TOP_MARGIN,
     -- notify_icons = NOTIFY_DEFAULT_ICONS,
+    -- notify_text_aligment = NOTIFY_DEFAULT_ALIGNMENT,
 }
 
 local M = { }
@@ -102,8 +107,6 @@ local M = { }
 -- notify_border_colors - the border color of the notification created with
 --                        notify(). defaults to NOTIFY_DEFAULT_BORDER_COLORS.
 --                        (a table is required)
--- notify_line_breakat  - the characters to split long lines at when using
---                        notice.notify(). expects a string.
 -- notify_popup_title   - title of the notification popup window itself. defaults
 --                        to NOTIFY_DEFAULT_TITLE. expects a string.
 -- notify_top_margin    - top margin of the popup window. default to
@@ -113,6 +116,7 @@ local M = { }
 -- notify_icons         - the icons used when a module/plugin name is passed
 --                        to the notify() function. Must be a list of four
 --                        strings, in the format: {info, success, error, warn}
+-- notify_text_aligment - notification text alignment. expects one of: 'center' or 'left'.
 function M.setup(options)
     if options and type(options) ~= 'table' then
         error('notice.setup: \'options\' is the wrong type: received \''
@@ -147,11 +151,11 @@ function M.setup(options)
     notify_border_hl.fg = colors[WARNING]
     vim.api.nvim_set_hl(0, NOTIFY_HIGHLIGHT_GROUPS[WARNING], notify_border_hl)
 
-    CONFIG.notify_line_breakat = options.notify_line_breakat or NOTIFY_DEFAULT_LINE_BREAKAT
-    CONFIG.notify_popup_title = options.notify_popup_title or NOTIFY_DEFAULT_TITLE
-    CONFIG.notify_right_margin = options.notify_right_margin or NOTIFY_DEFAULT_RIGHT_MARGIN
-    CONFIG.notify_top_margin = options.notify_top_margin or NOTIFY_DEFAULT_TOP_MARGIN
-    CONFIG.notify_icons = options.notify_icons or NOTIFY_DEFAULT_ICONS
+    CONFIG.notify_popup_title   = options.notify_popup_title or NOTIFY_DEFAULT_TITLE
+    CONFIG.notify_right_margin  = options.notify_right_margin or NOTIFY_DEFAULT_RIGHT_MARGIN
+    CONFIG.notify_top_margin    = options.notify_top_margin or NOTIFY_DEFAULT_TOP_MARGIN
+    CONFIG.notify_icons         = options.notify_icons or NOTIFY_DEFAULT_ICONS
+    CONFIG.notify_text_aligment = options.notify_text_aligment or NOTIFY_DEFAULT_ALIGNMENT
 end
 
 -- this function wraps around the popup.create() function to
@@ -219,159 +223,53 @@ end
 -- type             - the type of the notification. can be either:
 --                  - 'information', 'success', 'failure', 'warning'.
 --                    defaults to 'information'.
+-- alignment        - alignment of the text. can be either 'center' or 'left'.
+--                    defaults NOTIFY_DEFAULT_ALIGNMENT.
 function M.notify(what, options)
     options = options or { }
+
+    local ARGS_SPEC = {
+        what = {
+            type = {'string', 'table'},
+            required = true
+        },
+        options = {
+            type = 'table',
+        }
+    }
+
+    validate({what = what, options=options}, ARGS_SPEC)
+
+    local OPTIONS_SPEC = {
+        time            = { type = 'number' },
+        module          = { type = 'string' },
+        center_module   = { type = 'boolean' },
+        alignment       = { type = 'string', expects = {'center', 'left'} },
+        type            = {
+            type = 'string',
+            expects = {'information', 'success', 'failure', 'warning'}
+        }
+
+    }
+
+    validate(options, OPTIONS_SPEC)
+
     local notify_type = options.type or 'information'
-    local type_map = {
+    local TYPE_MAP = {
         information = INFO,
         success = SUCCESS,
         failure = FAILURE,
         warning = WARNING,
     }
-    local type_to_higroup_map = {
+    local HIGROUP_MAP = {
         information = NOTIFY_HIGHLIGHT_GROUPS[INFO],
         success = NOTIFY_HIGHLIGHT_GROUPS[SUCCESS],
         failure = NOTIFY_HIGHLIGHT_GROUPS[FAILURE],
         warning = NOTIFY_HIGHLIGHT_GROUPS[WARNING],
     }
 
-    if not what then
-        error("notice.notify: argument required: 'what' (a string or a list of strings)")
-    end
-
-    if type(what) ~= 'table' and type(what) ~= 'string' then
-        error('notice.setup: \'what\' is the wrong type: received \''
-              ..type(what)..'\', required: \'table\' or \'string\'')
-    end
-
-    if type(options) ~= 'table' then
-        error('notice.setup: \'options\' is the wrong type: received \''
-              ..type(options)..'\', required: \'table\'')
-    end
-
-    local time = options.time
-    if time and type(time) ~= 'number' then
-        error('notice.setup: \'time\' is the wrong type: received \''
-              ..type(time)..'\', required: \'number\'')
-    end
-
     local width = NOTIFY_DEFAULT_WIDTH
-
-    -- going into their own function cause of deep nesting issues
-    local process_word = function(arg_tbl, word)
-        arg_tbl.curr_len = arg_tbl.curr_len + #word
-
-        local BREAKAT = CONFIG.notify_line_breakat
-        local breakat = string.find(word, '(['..BREAKAT..'])')
-        arg_tbl.last_breakat_index = breakat or arg_tbl.last_breakat_index
-
-        table.insert(arg_tbl.line_array, word)
-
-        if breakat then
-            arg_tbl.last_breakat_word = #arg_tbl.line_array
-        end
-
-        local line
-        local len
-        if arg_tbl.curr_len >= arg_tbl.maxlen then
-            if arg_tbl.last_breakat_word then
-                -- there is a breakat character in a word we found.
-                -- we are going to concatenate the string up until that word.
-                -- then calculate the index of the breakat character and take
-                -- the substring up until that character.
-                breakat = arg_tbl.last_breakat_index
-                local last_word = arg_tbl.last_breakat_word
-                local fullstring = table.concat(arg_tbl.line_array, '', 1, last_word)
-                local length_last_word = #arg_tbl.line_array[last_word]
-                local loc_from_last = length_last_word - (length_last_word - breakat)
-
-                line = string.sub(fullstring, 1, #fullstring - loc_from_last)
-            else
-                -- there is no breakat character, break the last word in
-                -- two parts, the first part has to have maxlen-1 characters
-                -- of the original string plus the NOTIFY_DEFAULT_WORDBREAK_CHAR
-                -- character.
-                local fullstring = table.concat(arg_tbl.line_array)
-                line = string.sub(fullstring, 1, arg_tbl.maxlen-1)..NOTIFY_DEFAULT_WORDBREAK_CHAR
-            end
-            len = #line
-        end
-
-        return { line, len }
-    end
-
-    -- split the line into two or more lines, each at most maxlen of length.
-    -- it tries to split the line at the nearest space or puctuation, if not
-    -- able to find any then it uses a wordbreak char as the last character in the line
-    local split_into_lines = function(line, maxlen)
-        local lines = { }
-        local lengths = { }
-        local index = 1
-
-        -- this removes '-' if the user specifies it with notify_line_breakat.
-        local WORD = string.gsub('[-a-zA-Z0-9_]', CONFIG.notify_line_breakat, '')
-        local PATTERN = '\\('..WORD..'\\+\\|\\s\\+\\|[[:punct:]]\\+\\)'
-        while index < #line do
-            local vars = {
-                line_array = { },
-                curr_len = 0,
-                maxlen = maxlen,
-                -- last_breakat_word = nil,
-                -- last_breakat_index = nil
-            }
-            local res
-            for word in re_gmatch(string.sub(line, index), PATTERN) do
-                res = process_word(vars, word)
-                if res[1] ~= nil then
-                    break
-                end
-            end
-
-            local line, len = table.unpack(res)
-            if line == nil then
-                -- reached the end of the string and there is some residue
-                line = table.concat(vars.line_array)
-                len = #line
-            end
-
-            table.insert(lines, line)
-            table.insert(lengths, len)
-            index = index + len
-        end
-
-        return { lines, lengths }
-    end
-
-    -- going into their own function cause of deep nesting issues
-    local extend_list = function(lst_output, lst_input)
-        for _, val in ipairs(lst_input) do
-            table.insert(lst_output, val)
-        end
-    end
-
-    -- going into their own function cause of deep nesting issues
-    local copy_tbl_and_split_lines = function(what, maxlen)
-        local lines = {}
-        local lengths = {}
-        for _,line in ipairs(what) do
-            local len = #line
-            if len > maxlen then
-                local res = split_into_lines(line, maxlen)
-                extend_list(lines, res[1])
-                extend_list(lengths, res[2])
-            else
-                table.insert(lines, line)
-                table.insert(lengths, len)
-            end
-        end
-
-        return { lines, lengths }
-    end
-
-    local get_alignment = function (maxlen, len)
-        local rest = maxlen - len
-        return rest == 0 and 0 or math.ceil(rest / 2)
-    end
+    local alignment = options.alignment or CONFIG.notify_text_aligment
 
     -- the algorithm to center the lines is really simple:
     --
@@ -379,44 +277,29 @@ function M.notify(what, options)
     -- - calculate the alignment such that the left side has at most 1 character
     --   less than the right side.
     -- - fill up the lines after skipping the alignment characters.
-    local center_lines = function(what, maxlen)
+    local align_lines = function(what, maxlen)
         local lines = {}
         local lengths = {}
         if type(what) == 'string' then
             if #what > maxlen then
-                lines, lengths = table.unpack(split_into_lines(what, maxlen))
+                lines, lengths = table.unpack(splitln(what, maxlen))
             else
                 lines = {what}
                 lengths = {#what}
             end
         elseif type(what) == 'table' then
-            lines, lengths = table.unpack(copy_tbl_and_split_lines(what, maxlen))
+            lines, lengths = table.unpack(splitln_l(what, maxlen))
         end
 
-        -- the calculation to get the alignment is as follows:
-        --
-        -- - subtract from maxlen the length of the current string.
-        -- - if the result is zero, then simply set the alignment to zero.
-        -- - else:
-        --     - divide by 2 and use math.ceil() to get the alignment.
-        local alignments = {}
-        for i, len in ipairs(lengths) do
-            alignments[i] = get_alignment(maxlen, len)
+        if alignment == 'center' then
+            return centerln_l(lines, maxlen)
         end
-
-        local centered_lines = {}
-        for i, line in ipairs(lines) do
-            local spaces = string.rep(' ', alignments[i])
-            centered_lines[i] = string.format('%s%s', spaces, line)
-        end
-
-        return centered_lines
+        return lines
     end
 
-    local lines = center_lines(what, width)
+    local lines = align_lines(what, width)
 
     local module_name = options.module
-    local module_name_linesnr
     if module_name then
         -- also optionally center the module name
         -- subtract two to account for the starting space and icon
@@ -424,7 +307,8 @@ function M.notify(what, options)
         if options.center_module then
             spaces = string.rep(' ', get_alignment(width, #module_name) - 2)
         end
-        local icon = CONFIG.notify_icons[type_map[notify_type]]
+
+        local icon = CONFIG.notify_icons[TYPE_MAP[notify_type]]
         module_name = ' '..icon..spaces..module_name
         table.insert(lines, 1, string.rep('─', width))
         table.insert(lines, 1, module_name)
@@ -477,9 +361,9 @@ function M.notify(what, options)
         title = CONFIG.notify_popup_title,
         wrap = true,
         padding = NOTIFY_DEFAULT_PADDING,
-        --time = time or NOTIFY_DEFAULT_TIME,
+        --time = options.time or NOTIFY_DEFAULT_TIME,
         border = true,
-        borderhighlight = type_to_higroup_map[notify_type],
+        borderhighlight = HIGROUP_MAP[notify_type],
         borderchars = BORDER_DEFAULT_CHARACTERS,
         highlight = TEXT_HIGHLIGHT_GROUP_NAME
     }
@@ -493,8 +377,8 @@ function M.notify(what, options)
     vim.api.nvim_buf_set_lines(bufnr, 0, 1, true, lines)
 
     if module_name then
-        vim.api.nvim_buf_add_highlight(bufnr, 0, type_to_higroup_map[notify_type], 0, 0, -1)
-        vim.api.nvim_buf_add_highlight(bufnr, 0, type_to_higroup_map[notify_type], 1, 0, -1)
+        vim.api.nvim_buf_add_highlight(bufnr, 0, HIGROUP_MAP[notify_type], 0, 0, -1)
+        vim.api.nvim_buf_add_highlight(bufnr, 0, HIGROUP_MAP[notify_type], 1, 0, -1)
     end
 
     return popup.create(bufnr, vim_options)

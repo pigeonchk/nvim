@@ -16,4 +16,3 @@
 * add animations to the notification popup
 * add loading animations to the notification popup
 * add support for multiple notifications at the same time
-* add support to select either centering or left alignment in the notification API
