@@ -35,6 +35,8 @@ require('packer').startup(function()
             requires = { 'kyazdani42/nvim-web-devicons', opt = true }
         }
 
+    use { 'rcarriga/nvim-notify' }
+
     -- treesitter is used for a lot of things like:
     --   * syntax highlighting
     --   * folding

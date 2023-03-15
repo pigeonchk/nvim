@@ -8,14 +8,14 @@ vim.g.author_name = 'Gabriel Manoel'
 --    init.lua -- require() the various lua files
 --    lua/
 --      |- abbrev.lua       -- all my abbreviations
---      |- align.lua        -- utility functions for text alignment
 --      |- colors.lua       -- colorscheme things
 --      |- mappings.lua     -- all my mappings
---      |- notice.lua       -- notification API
 --      |- plugins.lua      -- initializes then on startup
 --      |- re.lua           -- vim regex version of some of lua's string functions
 --      |- settings.lua     -- all my vim settings
 --      |- statusline.lua   -- configures the statusline
+--      |- utils.lua        -- some utility functions that don't belong anywhere else
+--      |- validation.lua   -- contains functions to validate options
 --      |- viml.lua         -- common wrappers around vimscript functions
 -- ]]
 
@@ -30,13 +30,3 @@ require('statusline').setup('jellybeans')
 require('settings').set_sensible() -- first setup the plugins
 require('abbrev')
 require('mappings')
-
--- this is my custom notification system
-require('notice').setup { }
-
-require('notice').notify({'this is a notification', 'a', 'b', 'c'}, {
-    module = 'My awesome plugin',
-    center_module = true,
-    alignment = 'left'
-})
-require('notice').notify({'this is a notification 2', 'a', 'b', 'c'})
