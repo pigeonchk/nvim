@@ -10,10 +10,5 @@
      -- Highlight the symbol and its references when holding the cursor
      autocmd {'CursorHold', '*', 'call CocActionAsync("highlight")'}
 * customize vim-surround
-* make a popup when something updates
 * investigate segfault that sometimes occur
 * put a column as a marker at the 100th (adjustable) column
-* add animations to the notification popup
-* add loading animations to the notification popup
-* add support for multiple notifications at the same time
-* send error notifications instead of error()

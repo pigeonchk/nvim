@@ -1,3 +1,5 @@
+local notify_err = require('error')
+
 local M = { }
 
 -- validate that the table is structured according to spec
@@ -16,22 +18,21 @@ local M = { }
 --     }
 -- }
 function M.validate(tbl, spec)
-
     if not tbl then
-        error("validation.validate: argument 'tbl' is required")
+        notify_err('validation.validate', "argument 'tbl' is required")
     end
 
     if type(tbl) ~= 'table' then
-        error("validation.validate: argument 'tbl' is the wrong type: "..
+        notify_err('validation.validate', "argument 'tbl' is the wrong type: "..
               "received '"..type(tbl).."', expected 'table'")
     end
 
     if not spec then
-        error("validation.validate: argument 'spec' is required")
+        notify_err('validation.validate', "argument 'spec' is required")
     end
 
     if type(spec) ~= 'table' then
-        error("validation.validate: argument 'spec' is the wrong type: "..
+        notify_err('validation.validate', "argument 'spec' is the wrong type: "..
               "received '"..type(spec).."', expected 'table'")
     end
 
@@ -79,8 +80,8 @@ function M.validate(tbl, spec)
                 end
             end
         else
-            error("validation.validate: 'spec."..key..".type' is the wrong type: "..
-                  "received '"..type(requested).."', expected 'table' or 'string'")
+            notify_err('validation.validate', {"'spec."..key..".type' is the wrong type: ",
+                  "received '"..type(requested).."', expected 'table' or 'string'"})
         end
         return true
     end
@@ -95,18 +96,18 @@ function M.validate(tbl, spec)
                 local tp_1 = type(v[1])
                 local tp_2 = type(v[2])
                 if tp_1 ~= 'string' or tp_2 ~= 'table' then
-                    error("validation.validate: 'spec."..key..".expects["..i
-                          .."]' is the wrong type: ".. "received {'"..tp_1.."', '"
-                          ..tp_2.."'}, expected {'string', 'table'}")
+                    notify_err('validation.validate', {"'spec."..key..".expects["..i
+                          .."]' is the wrong type: ", "received {'"..tp_1.."', '"
+                          ..tp_2.."'}, expected {'string', 'table'}"})
                 end
 
                 if v[1] == type_of_val and check_expected(v[2], got, key, type_of_val) then
                     return true
                 end
             else
-                error("validation.validate: 'spec."..key..".expects["..i
-                      .."]' is the wrong type: ".. "received '"
-                      ..type(v).."', expected 'table' or 'string'")
+                notify_err('validation.validate', {"'spec."..key..".expects["..i
+                      .."]' is the wrong type: ", "received '"
+                      ..type(v).."', expected 'table' or 'string'"})
             end
         end
 
@@ -116,7 +117,7 @@ function M.validate(tbl, spec)
     local caller = debug.getinfo(2, 'n').name
     for k, v in pairs(spec) do
         if v.required and tbl[k] == nil then
-            error(caller..": argument '"..k.."' is required")
+            notify_err(caller, "argument '"..k.."' is required")
         end
 
         local type_of_val = type(tbl[k])
@@ -131,15 +132,15 @@ function M.validate(tbl, spec)
             else
                 expected_type = "'"..v.type.."'"
             end
-            error(caller..": argument '"..k.."' is the wrong type: "..
-                  "received '"..type_of_val.."', expected "..expected_type)
+            notify_err(caller, {"argument '"..k.."' is the wrong type: ",
+                  "received '"..type_of_val.."', expected "..expected_type})
         end
 
         if v.expects and tbl[k] ~= nil then
             if not check_expected(v.expects, tbl[k], k, type_of_val) then
-                error(caller..": argument '"..k.."' has the wrong value: "..
+                notify_err(caller, {": argument '"..k.."' has the wrong value: ",
                       "received '"..tbl[k].."', expected "
-                      ..tbl_to_str(type_of_val, v.expects))
+                      ..tbl_to_str(type_of_val, v.expects)})
             end
         end
     end
