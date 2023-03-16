@@ -17,6 +17,7 @@ vim.g.author_name = 'Gabriel Manoel'
 --      |- utils.lua        -- some utility functions that don't belong anywhere else
 --      |- validation.lua   -- contains functions to validate options
 --      |- viml.lua         -- common wrappers around vimscript functions
+--      |- error.lua        -- an error function that shows a notification
 -- ]]
 
 require('plugins') -- first setup the plugins
@@ -28,8 +29,6 @@ require('colors').colorscheme('gruvbox',
         ch_highlight('LineNr', {bg = '#303030' })
 end)
 require('statusline').setup('jellybeans')
-require('settings').set_sensible() -- first setup the plugins
+require('settings').setup() -- first setup the plugins
 require('abbrev')
 require('mappings')
-
-require('notification').setup_watcher(60 * 1000)

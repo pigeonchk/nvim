@@ -1,8 +1,4 @@
-* Set vim.o.background = dark at require('colors').colorscheme.
-  Maybe like this:
-  require('colors').colorscheme('gruvbox', function()
-  	vim.o.background = 'dark'
-  end)
+* investigate segfault that sometimes occur
 * setup new keymaps (or just stick with the defaults) of the treesiter
   incremental selection. This is set at plugins/plugins.lua
 * check new treesitter modules: https://github.com/nvim-treesitter/nvim-treesitter/wiki/Extra-modules-and-plugins
@@ -10,5 +6,3 @@
      -- Highlight the symbol and its references when holding the cursor
      autocmd {'CursorHold', '*', 'call CocActionAsync("highlight")'}
 * customize vim-surround
-* investigate segfault that sometimes occur
-* put a column as a marker at the 100th (adjustable) column

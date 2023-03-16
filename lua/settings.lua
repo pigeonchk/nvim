@@ -7,7 +7,7 @@ vim.cmd('filetype plugin indent on')
 
 local M = {}
 
-function M.set_sensible()
+function M.setup()
     -- allow backspace over autoindent, line breaks,
     -- and make CTRL-W and CTRL-U to not stop at the start of insert
     o.backspace = 'indent,eol,nostop'
@@ -123,6 +123,7 @@ function M.set_sensible()
     o.foldminlines = 6
     -- don't nest folds too deeply or it will be a pain to reach inside
     o.foldnestmax = 2
+    o.colorcolumn = {100}
 end
 
 return M
