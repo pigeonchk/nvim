@@ -37,6 +37,8 @@ function M.setup()
     o.breakindentopt = 'sbr'
 
     -- 1}}}
+    -- insert a break after this much characters
+    o.textwidth = 100
 
     -- when 'list' is enabled, use this character to display <EOL> characters.
     o.listchars = 'eol:¬'
@@ -82,7 +84,8 @@ function M.setup()
     -- mouse support for all modes
     o.mouse = 'a'
     -- CTRL-A and CTRL-X increment/decrement octal values.
-    o.nrformats:append('octal')
+    -- 'unsigned' makes vim to always recognize number values as unsigned.
+    o.nrformats:append('octal', 'unsigned')
     -- nice number in front of lines
     o.number = true
     o.relativenumber = true
@@ -123,7 +126,10 @@ function M.setup()
     o.foldminlines = 6
     -- don't nest folds too deeply or it will be a pain to reach inside
     o.foldnestmax = 2
+    -- set these columns to be highlighted
     o.colorcolumn = {100}
+    -- also scan the included files for ins-completion
+    o.complete:append('i', 'd')
 end
 
 return M

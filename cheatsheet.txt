@@ -1,2 +1,115 @@
 ## FZF @files
 Choose a file from the current project | <leader>fzf
+
+## CommandEx @ex
+Move the cursor one character left | <Left>
+Move the cursor one character right | <Right>
+Move the cursor one word left | <S-Left>
+Move the cursor one word right | <S-Right>
+Move to beginning of command line | <CTRL-B>
+Move to end of command line | <CTRL-E>
+Open command line window | q:
+
+## File @file @search @path
+Find and open the filename under the cursor | gf
+Find and open the filename under the cursor in a new window | <CTRL-W>f
+
+## Buffer
+List all buffers | :ls
+Choose a buffer from the buffer list | :[N]b[uffer] {number|filename}
+Go to next buffer | :[N]bn[ext][!]
+Go to previous buffer | :[N]bp[rev][!]
+Delete a buffer(s) (for real) | :[N[,M]]bw[ipeout][!]
+
+## Deleting @editing
+(Insert Mode) Delete the whole word before the cursor | <CTRL-W>
+(Insert Mode) Delete contents of the line up until the cursor | <CTRL-U>
+(Insert Mode) Delete the character before the cursor | <CTRL-H>
+Delete from the cursor to the end of the line | D
+
+## Completion
+(Insert Mode) Start completion/Navigate forward | <CTRL-N>
+(Insert Mode) Start completion/Navigate backwards | <CTRL-P>
+(Insert Mode) Start completion of filenames | <CTRL-F>
+(Insert Mode) Start completion of macro definitions in the current and included files | <CTRL-X><CTRL-D>
+(Insert Mode) Start completion of keywords in the current and included files | <CTRL-X><CTRL-I>
+
+## Repeating
+(Insert Mode) Insert the text that was typed in the last insert mode | <CTRL-A>
+(Insert Mode) Insert the text that was typed in the last insert mode, then exit insert mode | <CTRL-@>
+
+## Insert @digraphs
+Insert a special character (digraph) | <CTRL-K>{SEQ}
+Format lines | gq{motion}
+
+## Normal
+Enter normal mode command in Insert mode | <CTRL-O>{command}
+Add [count] to the number or alphabetic character at or after the cursor | [count]<CTRL-A>
+subtract [count] from the number or alphabetic character at or after the cursor | [count]<CTRL-X>
+
+## Indentation
+Increase the indent of {range} lines | [range]>>
+Increase the indent of {range} lines | [range]>>
+Re-indent the line(s) | ={motion}
+(Insert Mode) Add one 'shiftwidth' to the indent of the line, regardless of the cursor position | <CTRL-T>
+(Insert Mode) remove one 'shiftwidth' of the indent of the line, regardless of the cursor position | <CTRL-D>
+
+## Selection
+Re-select the previous selected area | gv
+
+## Tags @identifier @programming
+Show a list of the references to the identifier under the cursor | [I
+Show the line at which the identifier under the cursor was defined | [i
+Display all macro definitions that contain the macro under the cursor. | [D
+Display all macro definitions that contain the macro under the cursor. | [D
+Like [D, but start at the current cursor position. | ]D
+Jump to the line shown by [i or the {N} item shown by [I | [<Tab>
+
+## Compiling @programming @make
+Compile the program with Make | :make [arguments]
+Jump to the position where the next error occured | :cnext
+Jump to the position where the previous error occured | :cprevious
+Jump to the position where the first error occured | :cfist
+Jump to the position where the last error occured | :clast
+Display error [nr] | :[nr]cc[!]
+Show a overview of all the error messages | :clist[!]
+Set the program to be used by the :make command | :set makeprg=
+Go back to the previous error list | :colder
+Go forward to the next error list | :cnewer
+
+## Window @scrolling @centering
+Put the line under the cursor in the middle of the viewing screen | zz
+Put the line under the cursor in the top of the viewing screen | zt
+Put the line under the cursor in the bottom of the viewing screen | zb
+Move the view half a screen downwards | <CTRL-U>
+Move the view half a screen upwards | <CTRL-D>
+Move the view one screen line upwards | <CTRL-E>
+Move the view one screen line downwards | <CTRL-Y>
+Move the view one whole screen backwards | <CTRL-B>
+Move the view one whole screen forward | <CTRL-F>
+
+## Marks @jump
+Jump to last position | ''
+Jump to older positions | <CTRL-O>
+Jump to newer positions | <CTRL-I>
+
+## Refactor @treesitter
+rename the identifier under the cursor in the current file | grr
+
+## Matchup @plugin
+ Go forwards to the next [count]th matching word | %
+ Go forwards to the previous [count]th matching word | g%
+ Go to the previous [count]th outer open word | [%
+ Go to the [count]th next surrounding close word | ]%
+ Go to inside [count]th nearest inner contained block | z%
+ The inside of an *any* block | i%
+ The inside of an *open-to-close* block | 1i%
+ An *any* block | a%
+ An *open-to-close* block | 1a%
+
+## Search
+Remove the highlighted matches until the next search | <leader><space>
+
+## Surround @plugin
+
+## TxtObject @textobjects @motion

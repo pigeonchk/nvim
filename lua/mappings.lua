@@ -31,10 +31,10 @@ inoremap('<A-k><A-J>', '<esc>')
 inoremap('<A-j><A-K>', '<esc>')
 inoremap('<A-K><A-j>', '<esc>')
 
--- go to the beginning of the line
-nnoremap('H', '0')
--- go to the end of the line
-nnoremap('L', '$')
+-- set j and k to move one screen line, even if there's a long
+-- line wrapping below of above
+nnoremap('j', 'gj')
+nnoremap('k', 'gk')
 
 -- exit terminal mode
 tnoremap('<esc>', '<C-\\><C-n>')
@@ -74,8 +74,6 @@ nnoremap('<leader>ca', '<Plug>(coc-calc-result-append)')
 nnoremap('<leader>cr', '<Plug>(coc-calc-result-replace)')
 
 -- 1}}}
-
-nnoremap('<leader>f', ':Files<CR>')
 
 local M = {}
 
