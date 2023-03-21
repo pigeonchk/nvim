@@ -32,3 +32,8 @@ require('statusline').setup('jellybeans')
 require('settings').setup() -- first setup the plugins
 require('abbrev')
 require('mappings')
+
+autocmd({'BufNew','BufNewFile'}, {
+    group = augroup('LICENSE_C', {}),
+    pattern = '*.c',
+    callback = require('license').detect_and_insert_license })

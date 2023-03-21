@@ -43,5 +43,32 @@ function M.tbl_toprint(tbl, indent)
     return toprint
 end
 
+function M.upsearch(path, filename)
+    local SPEC = {
+        path = { type = 'string' },
+        filename = { type = 'string' },
+    }
+
+    validate({path = path, filename = filename}, SPEC)
+
+    local splitted = vim.split(path, '/')
+    local dirs = { }
+    local current_dir = ''
+    for _,dir in ipairs(splitted) do
+        if dir ~= '' then
+            current_dir = current_dir..'/'..dir
+            table.insert(dirs, current_dir)
+        end
+    end
+
+    for _ = 1, #dirs do
+        local file_to_test = table.remove(dirs, #dirs)..'/'..filename
+        if vim.fn.glob(file_to_test) ~= '' then
+            return file_to_test
+        end
+    end
+
+    return nil
+end
 
 return M

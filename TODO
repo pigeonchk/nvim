@@ -5,7 +5,6 @@
      autocmd {'CursorHold', '*', 'call CocActionAsync("highlight")'}
 * customize vim-surround
 * customize 'shada'
-* make a system where it asks at startup whether to restore a session, if there's one.
   also, asks to save session on :wq!
 * add a plugin that checks for all included file (:checkpath) and reports as a notification if
   the header was not found. Run at every :write?
