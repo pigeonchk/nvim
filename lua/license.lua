@@ -154,7 +154,16 @@ M.detect_and_insert_license = function()
         end
     end
 
-    M.insert_license(license)
+    if license then
+        M.insert_license(license)
+    else
+        local fields = vim.split(found, '/')
+        local filename = fields[#fields]
+        notify_err('license::detect_and_insert_license',
+                  {'Didn\'t find a license in '..filename..' that we know about.',
+                   'Add it to lua/licenses.lua to be able to automatically insert this license.'})
+        return
+    end
 end
 
 return M
