@@ -1,9 +1,8 @@
-* setup new keymaps (or just stick with the defaults) of the treesitter
-* check new treesitter modules: https://github.com/nvim-treesitter/nvim-treesitter/wiki/Extra-modules-and-plugins
 * Customize CoC
-     -- Highlight the symbol and its references when holding the cursor
-     autocmd {'CursorHold', '*', 'call CocActionAsync("highlight")'}
+  * coc-fzf-preview
 * customize vim-surround
+* customize vim-lion
+* customize nvim-treesitter-refactor
 * customize 'shada'
   also, asks to save session on :wq!
 * add a plugin that checks for all included file (:checkpath) and reports as a notification if
