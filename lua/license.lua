@@ -75,14 +75,17 @@ local license_names = {
 local M = { }
 
 M.insert_license = function(license_name)
-    local SPEC = {
-        license_name = {
-            type = 'string',
-            expects = vim.tbl_keys(licenses)
-        }
-    }
+    local SPEC = { license_name = { type = 'string', required = true } }
 
-    validate({license_name = license_name}, SPEC)
+    if not validate({license_name = license_name}, SPEC) then
+        return nil
+    end
+
+    if not licenses[license_name] then
+        notify_err('license::insert_license',
+                   'license "'..license_name..'" does not exist')
+        return
+    end
 
     local comment_leader = vim.b.license_comment_leader
     if not comment_leader then

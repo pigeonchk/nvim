@@ -20,20 +20,24 @@ local M = { }
 function M.validate(tbl, spec)
     if not tbl then
         notify_err('validation.validate', "argument 'tbl' is required")
+        return false
     end
 
     if type(tbl) ~= 'table' then
         notify_err('validation.validate', "argument 'tbl' is the wrong type: "..
               "received '"..type(tbl).."', expected 'table'")
+        return false
     end
 
     if not spec then
         notify_err('validation.validate', "argument 'spec' is required")
+        return false
     end
 
     if type(spec) ~= 'table' then
         notify_err('validation.validate', "argument 'spec' is the wrong type: "..
               "received '"..type(spec).."', expected 'table'")
+        return false
     end
 
     function tbl_to_str(type_of_val, tbl, _lines)
@@ -82,6 +86,7 @@ function M.validate(tbl, spec)
         else
             notify_err('validation.validate', {"'spec."..key..".type' is the wrong type: ",
                   "received '"..type(requested).."', expected 'table' or 'string'"})
+            return false
         end
         return true
     end
@@ -108,6 +113,7 @@ function M.validate(tbl, spec)
                 notify_err('validation.validate', {"'spec."..key..".expects["..i
                       .."]' is the wrong type: ", "received '"
                       ..type(v).."', expected 'table' or 'string'"})
+                break
             end
         end
 
@@ -118,6 +124,7 @@ function M.validate(tbl, spec)
     for k, v in pairs(spec) do
         if v.required and tbl[k] == nil then
             notify_err(caller, "argument '"..k.."' is required")
+            return false
         end
 
         local type_of_val = type(tbl[k])
@@ -134,6 +141,7 @@ function M.validate(tbl, spec)
             end
             notify_err(caller, {"argument '"..k.."' is the wrong type: ",
                   "received '"..type_of_val.."', expected "..expected_type})
+            return false
         end
 
         if v.expects and tbl[k] ~= nil then
@@ -141,9 +149,11 @@ function M.validate(tbl, spec)
                 notify_err(caller, {": argument '"..k.."' has the wrong value: ",
                       "received '"..tbl[k].."', expected "
                       ..tbl_to_str(type_of_val, v.expects)})
+                return false
             end
         end
     end
+    return true
 end
 
 return M

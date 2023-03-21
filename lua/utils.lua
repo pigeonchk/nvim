@@ -5,8 +5,9 @@ local notify    = require('notify')
 local M = { }
 
 function M.tbl_shallowcopy(tbl)
-
-    validate({tbl = tbl}, {tbl={type='table', required=true}})
+    if not validate({tbl = tbl}, {tbl={type='table', required=true}}) then
+        return nil
+    end
 
     local new_tbl = { }
     for k, v in pairs(tbl) do
@@ -18,6 +19,16 @@ end
 
 -- taken from: https://stackoverflow.com/a/41943392/18443177
 function M.tbl_toprint(tbl, indent)
+
+    local SPEC = {
+        tbl = {type = 'table', required = true},
+        indent = { type = 'number' }
+    }
+
+    if not validate({tbl=tbl, indent=indent}, SPEC) then
+        return nil
+    end
+
     if not indent then indent = 0 end
     local toprint = string.rep(" ", indent) .. "{\n"
     indent = indent + 2
@@ -49,7 +60,9 @@ function M.upsearch(path, filename)
         filename = { type = 'string' },
     }
 
-    validate({path = path, filename = filename}, SPEC)
+    if not validate({path = path, filename = filename}, SPEC) then
+        return nil
+    end
 
     local splitted = vim.split(path, '/')
     local dirs = { }

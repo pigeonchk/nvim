@@ -11,7 +11,10 @@ function M.ch_highlight(grp, hl)
         grp = { type = 'string', required = true },
         hl  = { type = 'table', required = true }
     }
-    validate({grp = grp, hl = hl}, ARGS_SPEC)
+    if not validate({grp = grp, hl = hl}, ARGS_SPEC) then
+        return nil
+    end
+
     local HL_SPEC = {
         fg              = { type = 'string' },
         bg              = { type = 'string' },
@@ -34,7 +37,9 @@ function M.ch_highlight(grp, hl)
         ctermbg         = { type = 'string' },
         cterm           = { type = 'string' },
     }
-    validate(hl, HL_SPEC)
+    if not validate(hl, HL_SPEC) then
+        return nil
+    end
 
     local newhl = vim.api.nvim_get_hl_by_name(grp, true)
     for k,v in pairs(hl) do
