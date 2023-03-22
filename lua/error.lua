@@ -32,5 +32,5 @@ return function (module, s)
         '    function: '..func,
     })
 
-    vim.notify(s, vim.log.level.ERRORS, { title = module })
+    vim.notify(s, vim.log.levels.ERRORS, { title = module })
 end
