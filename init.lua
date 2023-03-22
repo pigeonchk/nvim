@@ -1,5 +1,4 @@
 local autocmd  = vim.api.nvim_create_autocmd
-local augroup  = vim.api.nvim_create_augroup
 
 vim.g.author_name = 'Gabriel Manoel'
 
@@ -33,9 +32,12 @@ require('settings').setup() -- first setup the plugins
 require('abbrev')
 require('mappings')
 
-autocmd({'BufNew','BufNewFile'}, {
-    group = augroup('LICENSE_C', {}),
+autocmd({'BufNewFile'}, {
     pattern = '*.c',
+    callback = require('license').detect_and_insert_license })
+
+autocmd({'BufNewFile'}, {
+    pattern = '*.h',
     callback = require('license').detect_and_insert_license })
 
 require('project').setup_if_project()
