@@ -1,6 +1,5 @@
 local validate  = require('validation').validate
 local re_gmatch = require('re').re_gmatch
-local notify    = require('notify')
 
 local M = { }
 

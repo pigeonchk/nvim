@@ -1,4 +1,3 @@
-local notify    = require('notify')
 local regex     = vim.regex
 
 return function (module, s)
@@ -33,5 +32,5 @@ return function (module, s)
         '    function: '..func,
     })
 
-    notify(s, 'error', { title = module })
+    vim.notify(s, vim.log.level.ERRORS, { title = module })
 end

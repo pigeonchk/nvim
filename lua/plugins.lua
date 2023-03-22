@@ -37,6 +37,8 @@ require('packer').startup(function()
 
     use { 'rcarriga/nvim-notify' }
 
+    vim.notify = require('notify')
+
     -- treesitter is used for a lot of things like:
     --   * syntax highlighting
     --   * folding
