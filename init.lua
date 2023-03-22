@@ -39,4 +39,3 @@ autocmd({'BufNew','BufNewFile'}, {
     callback = require('license').detect_and_insert_license })
 
 require('project').setup_if_project()
-

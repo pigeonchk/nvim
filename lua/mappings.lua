@@ -1,10 +1,11 @@
 -- vim:foldmethod=marker:foldlevel=0
 
-local noremap = require('viml').noremap
-local nnoremap = require('viml').nnoremap
-local inoremap = require('viml').inoremap
-local vnoremap = require('viml').vnoremap
-local tnoremap = require('viml').tnoremap
+local noremap   = require('viml').noremap
+local nnoremap  = require('viml').nnoremap
+local inoremap  = require('viml').inoremap
+local vnoremap  = require('viml').vnoremap
+local tnoremap  = require('viml').tnoremap
+local imap      = require('viml').imap
 
 vim.g.mapleader = ','
 
@@ -74,6 +75,19 @@ nnoremap('<leader>ca', '<Plug>(coc-calc-result-append)')
 nnoremap('<leader>cr', '<Plug>(coc-calc-result-replace)')
 
 -- 1}}}
+
+-- CoC {{{1
+
+nnoremap('[g', '<Plug>(coc-diagnostic-prev)', {silent = true})
+nnoremap(']g', '<Plug>(coc-diagnostic-next)', {silent = true})
+
+-- GoTo code navigation
+nnoremap("gd", "<Plug>(coc-definition)", {silent = true})
+nnoremap("gy", "<Plug>(coc-type-definition)", {silent = true})
+nnoremap("gi", "<Plug>(coc-implementation)", {silent = true})
+nnoremap("gr", "<Plug>(coc-references)", {silent = true})
+
+-- }}}
 
 local M = {}
 

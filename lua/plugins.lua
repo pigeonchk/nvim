@@ -141,13 +141,25 @@ require('packer').startup(function()
     -- Coc (Conquer of Completions) {{{1
     use {'neoclide/coc.nvim', branch = 'release'}
     g.coc_global_extensions = {
-        'coc-json',    'coc-clangd',   'coc-calc',       'coc-tsserver',
+        'coc-json',
+        'coc-clangd',
+        'coc-calc',
+        'coc-tsserver',
         -- 'coc-eslint',
-        'coc-htmlhint', 'coc-diagnostic', 'coc-glslx', 'coc-eslint',
+        'coc-htmlhint',
+        'coc-diagnostic',
+        'coc-glslx',
+        'coc-eslint',
         -- website: https://github.com/yuki-yano/fzf-preview.vim
-        'coc-fzf-preview'
+        'coc-fzf-preview',
+        'coc-lua',
     }
+
     -- }}}
+
+    use { 'mrded/nvim-lsp-notify', config = function()
+        require('lsp-notify').setup({})
+    end}
 
     -- highlight, navigate, and operate on sets of matching text.
     -- website: https://github.com/andymass/vim-matchup/

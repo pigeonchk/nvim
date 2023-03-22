@@ -64,8 +64,13 @@ Display all macro definitions that contain the macro under the cursor. | [D
 Display all macro definitions that contain the macro under the cursor. | [D
 Like [D, but start at the current cursor position. | ]D
 Jump to the line shown by [i or the {N} item shown by [I | [<Tab>
+[coc.nvim] goto definiton | gd
+[coc.nvim] goto type definiton | gy
+[coc.nvim] goto implementation | gi
+[coc.nvim] goto implementation | gi
+[coc.nvim] trigger snippets | <CTRL-J>
 
-## Compiling @programming @make
+## Compiling @programming @make @diagnostics
 Compile the program with Make | :make [arguments]
 Jump to the position where the next error occured | :cnext
 Jump to the position where the previous error occured | :cprevious
@@ -76,6 +81,8 @@ Show a overview of all the error messages | :clist[!]
 Set the program to be used by the :make command | :set makeprg=
 Go back to the previous error list | :colder
 Go forward to the next error list | :cnewer
+[coc.nvim] navigate to prev diagnostics | [g
+[coc.nvim] navigate to next diagnostics | ]g
 
 ## Window @scrolling @centering
 Put the line under the cursor in the middle of the viewing screen | zz

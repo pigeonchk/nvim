@@ -125,5 +125,8 @@
 // }}}
          }
       }
-  }
+    },
+    "Lua.diagnostics.globals": [
+      "vim"
+    ],
 }
