@@ -127,8 +127,6 @@ M.detect_and_insert_license = function(tbl)
         return
     end
 
-    print(require('utils').tbl_toprint(tbl))
-
     vim.b.license_autocmd_has_run = true
 
     local found
