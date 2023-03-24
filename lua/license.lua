@@ -119,9 +119,15 @@ M.detect_and_insert_license = function(tbl)
     local filenames = { 'LICENSE', 'LICENSE.txt' }
     local cwd = vim.fn.getcwd()
 
+    if tbl.event == 'BufNew' and vim.fn.glob(tbl.file) then
+        return
+    end
+
     if vim.b.license_autocmd_has_run then
         return
     end
+
+    print(require('utils').tbl_toprint(tbl))
 
     vim.b.license_autocmd_has_run = true
 
