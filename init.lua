@@ -32,11 +32,11 @@ require('settings').setup() -- first setup the plugins
 require('abbrev')
 require('mappings')
 
-autocmd({'BufNewFile'}, {
+autocmd({'BufNew', 'BufNewFile'}, {
     pattern = '*.c',
     callback = require('license').detect_and_insert_license })
 
-autocmd({'BufNewFile'}, {
+autocmd({'BufNew', 'BufNewFile'}, {
     pattern = '*.h',
     callback = require('license').detect_and_insert_license })
 
