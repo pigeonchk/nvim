@@ -1,4 +1,5 @@
 local autocmd  = vim.api.nvim_create_autocmd
+local augroup  = vim.api.nvim_create_augroup
 
 vim.g.author_name = 'Gabriel Manoel'
 
@@ -32,11 +33,18 @@ require('settings').setup() -- first setup the plugins
 require('abbrev')
 require('mappings')
 
+local buf_get_var = require('viml').buf_get_var
+local buf_set_var = require('viml').buf_set_var
+
+local c_fam_augroup = augroup('C_FAMILY_FTPLUGIN', {})
+
 autocmd({'BufNew', 'BufNewFile'}, {
+    group = c_fam_augroup,
     pattern = '*.c',
     callback = require('license').detect_and_insert_license })
 
 autocmd({'BufNew', 'BufNewFile'}, {
+    group = c_fam_augroup,
     pattern = '*.h',
     callback = require('license').detect_and_insert_license })
 
@@ -45,17 +53,18 @@ autocmd({'BufNew', 'BufNewFile'}, {
 vim.g.header_guard_prefix_dir_blacklist = { 'src' }
 
 autocmd({'BufNew', 'BufNewFile'}, {
+    group = c_fam_augroup,
     pattern = '*.h',
     callback = function(tbl)
         if not vim.b.header_guard_inserted then
 
             local skip = 0
-            if vim.b.license_autocmd_has_run then
+            if buf_get_var(tbl.buf, 'license_autocmd_has_run') then
                 skip = vim.api.nvim_buf_line_count(tbl.buf) - 1
             end
 
             require('ftplugin.header_guard')(tbl.buf, skip)
-            vim.b.header_guard_inserted = true
+            buf_set_var(tbl.buf, 'header_guard_inserted', true)
         end
     end})
 

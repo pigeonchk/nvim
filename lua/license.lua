@@ -1,6 +1,8 @@
 local validate      = require('validation').validate
 local notify_err    = require('error')
 local upsearch      = require('utils').upsearch
+local buf_get_var = require('viml').buf_get_var
+local buf_set_var = require('viml').buf_set_var
 
 local licenses = { }
 
@@ -123,11 +125,11 @@ M.detect_and_insert_license = function(tbl)
         return
     end
 
-    if vim.b.license_autocmd_has_run then
+    if buf_get_var(tbl.buf, 'license_autocmd_has_run') then
         return
     end
 
-    vim.b.license_autocmd_has_run = true
+    buf_set_var(tbl.buf, 'license_autocmd_has_run', true)
 
     local found
     for _,file in ipairs(filenames) do

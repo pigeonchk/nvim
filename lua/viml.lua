@@ -1,5 +1,8 @@
 -- vim:foldmethod=marker:foldlevel=0
 
+local validate  = require('validation').validate
+local notify_err = require('error')
+
 local cmd = vim.cmd
 
 local M = {}
@@ -92,5 +95,42 @@ end
 -- 2}}}
 
 -- 1}}}
+
+M.buf_get_var = function(buf, var)
+    local SPEC = {
+        buf = {type = 'number', required = true},
+        var = {type = 'string', required = true},
+    }
+
+    if not validate({buf = buf, var = var}, SPEC) then
+        return nil
+    end
+
+    local ok, val = pcall(vim.api.nvim_get_var, buf, var)
+
+    if ok then
+        return val
+    end
+
+    return nil
+end
+
+M.buf_set_var = function(buf, var, val)
+    local SPEC = {
+        buf = {type = 'number', required = true},
+        var = {type = 'string', required = true},
+    }
+
+    if not validate({buf = buf, var = var}, SPEC) then
+        return
+    end
+
+    if not val then
+        notify_err('viml', 'val is required for viml.buf_set_var()')
+        return
+    end
+
+    return pcall(vim.api.nvim_get_var, buf, var)
+end
 
 return M
