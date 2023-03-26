@@ -49,7 +49,6 @@ autocmd({'BufNew', 'BufNewFile'}, {
             if vim.b.license_autocmd_has_run then
                 skip = vim.api.nvim_buf_line_count(tbl.buf) - 1
             end
-                print(skip)
 
             require('ftplugin.header_guard')(tbl.buf, skip)
             vim.b.header_guard_inserted = true
