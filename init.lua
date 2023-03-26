@@ -40,4 +40,20 @@ autocmd({'BufNew', 'BufNewFile'}, {
     pattern = '*.h',
     callback = require('license').detect_and_insert_license })
 
+autocmd({'BufNew', 'BufNewFile'}, {
+    pattern = '*.h',
+    callback = function(tbl)
+        if not vim.b.header_guard_inserted then
+
+            local skip = 0
+            if vim.b.license_autocmd_has_run then
+                skip = vim.api.nvim_buf_line_count(tbl.buf) - 1
+            end
+                print(skip)
+
+            require('ftplugin.header_guard')(tbl.buf, skip)
+            vim.b.header_guard_inserted = true
+        end
+    end})
+
 require('project').setup_if_project()
