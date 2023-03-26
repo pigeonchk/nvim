@@ -40,6 +40,10 @@ autocmd({'BufNew', 'BufNewFile'}, {
     pattern = '*.h',
     callback = require('license').detect_and_insert_license })
 
+-- do not prefix the header guard with the directory name if
+-- the directory is one of these
+vim.g.header_guard_prefix_dir_blacklist = { 'src' }
+
 autocmd({'BufNew', 'BufNewFile'}, {
     pattern = '*.h',
     callback = function(tbl)

@@ -1,16 +1,24 @@
-local validate      = require('validation').validate
+local validate  = require('validation').validate
+local expand    = vim.fn.expand
 
 local function insert_guard_at_buf(bufnr, skip)
     skip = skip or 0
 
-    local ext = vim.fn.expand('#'..bufnr..':e')
-    local filename = vim.fn.expand('%'..bufnr..':p')
+
+    local ext = expand('#'..bufnr..':e')
+    local filename = expand('#'..bufnr..':p:t')
+    local dir = expand('#'..bufnr..':p:h:t')
 
     if ext ~= 'h' and ext ~= 'hpp' then
         vim.notify({
             'cannot insert header guard at buffer',
             filename..' is not a c/c++ header.'},
             vim.log.levels.ERROR, {title='ftplugin::header_guard'})
+    end
+
+    if not vim.g.header_guard_prefix_dir_blacklist or
+        not vim.tbl_contains(vim.g.header_guard_prefix_dir_blacklist, dir) then
+        filename = dir ..'/'..filename
     end
 
     local macro = string.upper(string.gsub(filename, '[%p%s]', '_'))
