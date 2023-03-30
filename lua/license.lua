@@ -115,21 +115,18 @@ M.insert_license = function(license_name)
 
     table.insert(commented_lines, '')
     vim.api.nvim_buf_set_lines(buf, 0, 0, false, commented_lines)
+
+    return #commented_lines
 end
 
 M.detect_and_insert_license = function(tbl)
     local filenames = { 'LICENSE', 'LICENSE.txt' }
     local cwd = vim.fn.getcwd()
 
+
     if tbl.event == 'BufNew' and vim.fn.glob(tbl.file) then
         return
     end
-
-    if buf_get_var(tbl.buf, 'license_autocmd_has_run') then
-        return
-    end
-
-    buf_set_var(tbl.buf, 'license_autocmd_has_run', true)
 
     local found
     for _,file in ipairs(filenames) do
@@ -167,7 +164,7 @@ M.detect_and_insert_license = function(tbl)
     end
 
     if license then
-        M.insert_license(license)
+        return M.insert_license(license)
     else
         local fields = vim.split(found, '/')
         local filename = fields[#fields]

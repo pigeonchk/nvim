@@ -38,34 +38,28 @@ local buf_set_var = require('viml').buf_set_var
 
 local c_fam_augroup = augroup('C_FAMILY_FTPLUGIN', {})
 
-autocmd({'BufNew', 'BufNewFile'}, {
+autocmd('BufNewFile', {
     group = c_fam_augroup,
     pattern = '*.c',
-    callback = require('license').detect_and_insert_license })
-
-autocmd({'BufNew', 'BufNewFile'}, {
-    group = c_fam_augroup,
-    pattern = '*.h',
     callback = require('license').detect_and_insert_license })
 
 -- do not prefix the header guard with the directory name if
 -- the directory is one of these
 vim.g.header_guard_prefix_dir_blacklist = { 'src' }
 
-autocmd({'BufNew', 'BufNewFile'}, {
+autocmd('BufNewFile', {
     group = c_fam_augroup,
     pattern = '*.h',
     callback = function(tbl)
-        if not vim.b.header_guard_inserted then
+        print(require('utils').tbl_toprint(tbl))
 
-            local skip = 0
-            if buf_get_var(tbl.buf, 'license_autocmd_has_run') then
-                skip = vim.api.nvim_buf_line_count(tbl.buf) - 1
-            end
-
-            require('ftplugin.header_guard')(tbl.buf, skip)
-            buf_set_var(tbl.buf, 'header_guard_inserted', true)
+        if buf_get_var(tbl.buf, 'header_guard_inserted') then
+            return
         end
+
+        local skip = require('license').detect_and_insert_license(tbl)
+
+        require('ftplugin.header_guard')(tbl.buf, skip)
     end})
 
 require('project').setup_if_project()

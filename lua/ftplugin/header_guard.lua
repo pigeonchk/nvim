@@ -1,5 +1,7 @@
 local validate  = require('validation').validate
 local expand    = vim.fn.expand
+local buf_get_var = require('viml').buf_get_var
+local buf_set_var = require('viml').buf_set_var
 
 local function insert_guard_at_buf(bufnr, skip)
     skip = skip or 0
