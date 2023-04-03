@@ -51,8 +51,6 @@ autocmd('BufNewFile', {
     group = c_fam_augroup,
     pattern = '*.h',
     callback = function(tbl)
-        print(require('utils').tbl_toprint(tbl))
-
         if buf_get_var(tbl.buf, 'header_guard_inserted') then
             return
         end
