@@ -1,15 +1,16 @@
 local validate  = require('validation').validate
 local expand    = vim.fn.expand
-local buf_get_var = require('viml').buf_get_var
-local buf_set_var = require('viml').buf_set_var
 
 local function insert_guard_at_buf(bufnr, skip)
     skip = skip or 0
 
-
     local ext = expand('#'..bufnr..':e')
     local filename = expand('#'..bufnr..':p:t')
     local dir = expand('#'..bufnr..':p:h:t')
+    local project = ''
+
+    local fullpath = expand('#'..bufnr..':p')
+    project = string.match(fullpath, '/include/(.*)/'..dir)
 
     if ext ~= 'h' and ext ~= 'hpp' then
         vim.notify({
@@ -21,6 +22,10 @@ local function insert_guard_at_buf(bufnr, skip)
     if not vim.g.header_guard_prefix_dir_blacklist or
         not vim.tbl_contains(vim.g.header_guard_prefix_dir_blacklist, dir) then
         filename = dir ..'/'..filename
+    end
+
+    if project ~= '' and project ~= dir then
+        filename = project..'/'..filename
     end
 
     local macro = string.upper(string.gsub(filename, '[%p%s]', '_'))
