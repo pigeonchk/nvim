@@ -24,7 +24,7 @@ local function insert_guard_at_buf(bufnr, skip)
         filename = dir ..'/'..filename
     end
 
-    if project ~= '' and project ~= dir then
+    if project and project ~= dir then
         filename = project..'/'..filename
     end
 
