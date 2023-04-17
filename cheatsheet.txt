@@ -120,3 +120,7 @@ Remove the highlighted matches until the next search | <leader><space>
 ## Surround @plugin
 
 ## TxtObject @textobjects @motion
+
+## Alignment @plugin @lion
+Align by character using spaces to the left | gl
+Align by character using spaces to the right | gL
