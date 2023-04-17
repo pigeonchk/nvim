@@ -2,6 +2,7 @@ local autocmd  = vim.api.nvim_create_autocmd
 local augroup  = vim.api.nvim_create_augroup
 
 vim.g.author_name = 'Gabriel Manoel'
+vim.g.author_email = 'gabrielmanoel13@gmail.com'
 
 -- [[ layout of folders are as following:
 --

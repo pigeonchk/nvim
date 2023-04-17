@@ -83,4 +83,16 @@ function M.upsearch(path, filename)
     return nil
 end
 
+function M.trim(s)
+    local SPEC = {
+        s = { type = 'string' },
+    }
+
+    if not validate({s = s}, SPEC) then
+        return nil
+    end
+
+    return string.gsub(string.gsub(s, '^%s+', ''), '%s+$', '')
+end
+
 return M

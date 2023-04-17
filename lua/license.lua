@@ -1,91 +1,56 @@
 local validate      = require('validation').validate
 local notify_err    = require('error')
 local upsearch      = require('utils').upsearch
-local buf_get_var = require('viml').buf_get_var
-local buf_set_var = require('viml').buf_set_var
+local trim          = require('utils').trim
 
-local licenses = { }
-
-licenses['MIT'] = [[
-MIT License
-
-Copyright (c) %Y Gabriel Manoel
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.]]
+-- a good place to get these headers are https://spdx.org/licenses/
+local license_headers = {
+    ['GPL-3.0-or-later'] = {
+        'Copyright (C) %Y <author> (<author_email>)',
+        '',
+        'This program is free software: you can redistribute it and/or modify it under',
+        'the terms of the GNU General Public License as published by the Free Software',
+        'Foundation, either version 3 of the License, or (at your option) any later',
+        'version.',
+        '',
+        'This program is distributed in the hope that it will be useful, but WITHOUT ANY',
+        'WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A',
+        'PARTICULAR PURPOSE. See the GNU General Public License for more details.',
+        '',
+        'You should have received a copy of the GNU General Public License along with',
+        'this program. If not, see <https://www.gnu.org/licenses/>.'
+    }
+}
 
 local license_names = {
-    ['0BSD']                = 'BSD Zero Clause License',
-    ['AFL-3.3']             = 'Academic Free License ("AFL") v. 3.0',
-    ['AGPL-3.0-or-later']   = 'GNU AFFERO GENERAL PUBLIC LICENSE',
-    ['Apache-2.0']          = 'Apache License',
-    ['Artistic-2.0']        = 'The Artistic License 2.0',
-    ['BSD-2-Clause']        = 'BSD 2-Clause License',
-    ['BSD-3-Clause-Clear']  = 'The Clear BSD License',
-    ['BSD-3-Clause']        = 'BSD 3-Clause License',
-    ['BSD-4-Clause']        = 'BSD 4-Clause License',
-    ['BSL-1.0']             = 'Boost Software License - Version 1.0',
-    ['CC-BY-4.0']           = 'Attribution 4.0 International',
-    ['CC-BY-SA-4.0']        = 'Attribution-ShareAlike 4.0 International',
-    -- technically the name of this license is 'Creative Commons Zero v1.0 Universal',
-    -- but in the license file the content of the first line is the one below.
-    ['CC0-1.0']             = 'Creative Commons Legal Code',
-    ['CECILL-2.1']          = 'CONTRAT DE LICENCE DE LOGICIEL LIBRE CeCILL',
-    ['CERN-OHL-P-2.0']      = 'CERN Open Hardware Licence Version 2 - Permissive',
-    ['CERN-OHL-S-2.0']      = 'CERN Open Hardware Licence Version 2 - Strongly Reciprocal',
-    ['CERN-OHL-W-2.0']      = 'CERN Open Hardware Licence Version 2 - Weakly Reciprocal',
-    ['ECL-2.0']             = 'Educational Community License',
-    ['EPL-1.0']             = 'Eclipse Public License - v 1.0',
-    ['EPL-2.0']             = 'Eclipse Public License - v 2.0',
-    ['EUPL-1.1']            = 'European Union Public Licence',
-    ['EUPL-1.2']            = 'EUROPEAN UNION PUBLIC LICENCE v. 1.2',
-    ['GFDL-1.3-or-later']   = 'GNU Free Documentation License',
-    ['GPL-2.0-or-later']    = 'GNU GENERAL PUBLIC LICENSE *Version 2',
-    ['GPL-3.0-or-later']    = 'GNU GENERAL PUBLIC LICENSE *Version 3',
-    ['ISC']                 = 'ISC License',
-    ['LGPL-2.1-or-later']   = 'GNU LESSER GENERAL PUBLIC LICENSE *Version 2.1',
-    ['LGPL-3.0-or-later']   = 'GNU LESSER GENERAL PUBLIC LICENSE *Version 3',
-    ['LPPL-1.3c']           = 'The LaTeX Project Public License',
-    ['MIT-0']               = 'MIT No Attribution',
+    ['GPL-2.0-or-later']    = 'GNU GENERAL PUBLIC LICENSE Version 2',
+    ['GPL-3.0-or-later']    = 'GNU GENERAL PUBLIC LICENSE Version 3',
+    ['LGPL-2.1-or-later']   = 'GNU LESSER GENERAL PUBLIC LICENSE Version 2.1',
+    ['LGPL-3.0-or-later']   = 'GNU LESSER GENERAL PUBLIC LICENSE Version 3',
     ['MIT']                 = 'MIT License',
-    ['MPL-2.0']             = 'Mozilla Public License Version 2.0',
-    ['MS-PL']               = 'Microsoft Public License (Ms-PL)',
-    ['MS-RL']               = 'Microsoft Reciprocal License (Ms-RL)',
-    ['MulanPSL-2.0']        = '木兰宽松许可证, 第2版',
-    ['NCSA']                = 'University of Illinois/NCSA Open Source License',
-    ['ODbL-1.0']            = 'ODC Open Database License (ODbL)',
-    ['OSL-3.0']             = 'Open Software License ("OSL") v. 3.0',
     ['Unlicense']           = 'This is free and unencumbered software',
 
 }
 
 local M = { }
 
-M.insert_license = function(license_name)
-    local SPEC = { license_name = { type = 'string', required = true } }
+M.insert_license = function(license_spdx)
+    local SPEC = { license_spdx = { type = 'string', required = true } }
 
-    if not validate({license_name = license_name}, SPEC) then
+    if not validate({license_spdx = license_spdx}, SPEC) then
         return nil
     end
 
-    if not licenses[license_name] then
+    if not license_names[license_spdx] then
         notify_err('license::insert_license',
-                   'license "'..license_name..'" does not exist')
+                   'license "'..license_spdx..'" does not exist')
+        return
+    end
+
+    header = license_headers[license_spdx]
+    if not header then
+        notify_err('license::insert_license',
+                   'license "'..license_spdx..'" is missing a standard header')
         return
     end
 
@@ -97,34 +62,42 @@ M.insert_license = function(license_name)
     end
 
     local buf = vim.api.nvim_get_current_buf()
-    local lines = vim.split(licenses[license_name], '\n')
 
-    local commented_lines = vim.tbl_map(function(line)
-        if #line == 0 then
-            return comment_leader
-        end
-        -- cannot call vim.fn.strftime on the whole string since the maximum
-        -- output is 80 characters, that means the license string will be cut
-        -- short. Instead, we need to find the line where the year is located
-        -- and call the function on that line.
-        if string.find(line, '%Y', 1, true) then
+    local commented_lines = {
+        comment_leader..' SPDX-License-Identifier: '..license_spdx,
+        comment_leader
+    }
+
+    for _, line in ipairs(header) do
+        if line:find('%%Y') then
             line = vim.fn.strftime(line)
         end
-        return comment_leader .. ' ' .. line
-    end, lines)
+        if line:find('<author>') then
+            line = string.gsub(line, '<author>', vim.g.author_name)
+        end
+        if line:find('<author_email>') then
+            line = string.gsub(line, '<author_email>', vim.g.author_email)
+        end
+
+        if line ~= '' then
+            line = ' '..line
+        end
+
+        table.insert(commented_lines, comment_leader..line)
+    end
 
     table.insert(commented_lines, '')
+
     vim.api.nvim_buf_set_lines(buf, 0, 0, false, commented_lines)
 
     return #commented_lines
 end
 
 M.detect_and_insert_license = function(tbl)
-    local filenames = { 'LICENSE', 'LICENSE.txt' }
+    local filenames = { 'LICENSE', 'LICENSE.txt', 'COPYING' }
     local cwd = vim.fn.getcwd()
 
-
-    if tbl.event == 'BufNew' and vim.fn.glob(tbl.file) then
+    if tbl and tbl.event == 'BufNew' and vim.fn.glob(tbl.file) then
         return
     end
 
@@ -138,27 +111,19 @@ M.detect_and_insert_license = function(tbl)
 
     if not found then
         notify_err('license::detect_and_insert_license',
-                  {'LICENSE or LICENSE.txt file was not found during upsearch.',
+                  {'LICENSE, LICENSE.txt, or COPYING file was not found during upsearch.',
                    'Cannot automatically insert license to buffer.'})
         return
     end
 
-    -- we assume the name of the license is written in the first line,
-    -- or in the case of GNU licenses, the version is in the second line.
+    -- we assume the name of the license is written in the first two lines
     local lines = vim.fn.readfile(found, '', 2)
-    local license_name = lines[1]..lines[2]
+    local license_name = trim(lines[1])..' '..trim(lines[2])
 
     local license
-    for short_name, long_name in pairs(license_names) do
-        if string.find(license_name, long_name) then
-
-            if not licenses[short_name] then
-                notify_err('license::detect_and_insert_license',
-                           'Found project license "'..short_name..'" but we don\'t have its text.')
-                return
-            end
-
-            license = short_name
+    for spdx, name in pairs(license_names) do
+        if string.find(license_name, name) then
+            license = spdx
             break
         end
     end
