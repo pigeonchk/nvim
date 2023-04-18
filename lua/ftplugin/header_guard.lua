@@ -10,7 +10,7 @@ local function insert_guard_at_buf(bufnr, skip)
     local project = ''
 
     local fullpath = expand('#'..bufnr..':p')
-    project = string.match(fullpath, '/include/(.*)/'..dir)
+    project = vim.g.project_name or string.match(fullpath, '/include/(.*)/'..dir)
 
     if ext ~= 'h' and ext ~= 'hpp' then
         vim.notify({
@@ -25,7 +25,10 @@ local function insert_guard_at_buf(bufnr, skip)
     end
 
     if project and project ~= dir then
-        filename = project..'/'..filename
+        if not vim.g.header_guard_prefix_dir_blacklist or
+            not vim.tbl_contains(vim.g.header_guard_prefix_dir_blacklist, project) then
+            filename = project..'/'..filename
+        end
     end
 
     local macro = string.upper(string.gsub(filename, '[%p%s]', '_'))

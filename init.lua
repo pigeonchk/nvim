@@ -46,7 +46,7 @@ autocmd('BufNewFile', {
 
 -- do not prefix the header guard with the directory name if
 -- the directory is one of these
-vim.g.header_guard_prefix_dir_blacklist = { 'src' }
+vim.g.header_guard_prefix_dir_blacklist = { 'src', 'include' }
 
 autocmd('BufNewFile', {
     group = c_fam_augroup,

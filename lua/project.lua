@@ -7,6 +7,7 @@ local valid_options = {
 local valid_variables = {
     builddir    = { type = 'string' },
     target      = { type = 'string' },
+    project     = { type = 'string', alt="name" },
 }
 
 local M = { }
@@ -41,7 +42,8 @@ M.setup_if_project = function()
                 vim.go[key] = val
             end
         elseif valid_variables[key] then
-            vim.g['project_'..key] = val
+            local varname = valid_variables[key].alt or key
+            vim.g['project_'..varname] = val
         elseif not vim.tbl_get(vim.go, key) then
                 vim.notify('unknown option \''..key..'\' found while parsing \'.project.json\'',
                     vim.log.levels.ERROR, {title = NOTIFY_TITLE})
