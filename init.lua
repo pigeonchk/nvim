@@ -62,3 +62,11 @@ autocmd('BufNewFile', {
     end})
 
 require('project').setup_if_project()
+
+autocmd('BufWinEnter', {
+    group = augroup('TXT_WINOPTIONS', {}),
+    pattern = '*.txt',
+    callback = function(tbl)
+        vim.api.nvim_win_set_option(vim.fn.bufwinid(tbl.buf), 'colorcolumn', '80')
+    end
+})
