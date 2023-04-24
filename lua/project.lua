@@ -5,9 +5,12 @@ local valid_options = {
 }
 
 local valid_variables = {
-    builddir    = { type = 'string' },
-    target      = { type = 'string' },
-    project     = { type = 'string', alt="name" },
+    -- the directory to find the executable
+    builddir        = { type = 'string' },
+    -- the name of the executable to run with :Run
+    target          = { type = 'string' },
+    -- name of the project
+    project         = { type = 'string', alt="name" },
 }
 
 local M = { }
