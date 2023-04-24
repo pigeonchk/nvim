@@ -56,6 +56,10 @@ M.insert_license = function(license_spdx)
         expects  = vim.tbl_keys(license_headers)
     }}
 
+    if string.lower(license_spdx) == 'unlicensed' then
+        return
+    end
+
     if not validate({license_spdx = license_spdx}, SPEC) then
         return nil
     end
