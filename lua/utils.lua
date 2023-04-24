@@ -95,4 +95,31 @@ function M.trim(s)
     return string.gsub(string.gsub(s, '^%s+', ''), '%s+$', '')
 end
 
+function M.sformat(fmt, params)
+    local SPEC = {
+        fmt = { type = { 'string', 'table' } },
+        params = { type = 'table' }
+    }
+
+    if not validate({fmt=fmt, params = params}, SPEC) then
+        return nil
+    end
+
+    local fmts = fmt
+    if type(fmt) == 'string' then
+        fmts = { fmt }
+    end
+
+    results = {}
+    for i, s in ipairs(fmts) do
+        table.insert(results, i, string.gsub(s, '%$(%w+)', params))
+    end
+
+    if type(fmt) == 'string' then
+        return results[1]
+    end
+
+    return results
+end
+
 return M
