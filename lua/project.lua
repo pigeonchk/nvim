@@ -1,3 +1,4 @@
+local validate  = require('validation').validate
 local upsearch  = require('utils').upsearch
 local sformat   = require('utils').sformat
 
@@ -24,7 +25,8 @@ local INVALID_OPTION = {
 }
 
 local function set_option(opt, val)
-    if type(val) ~= valid_options[opt].type then
+
+    if not validate({opt = val}, valid_options) then
         local params  = {
             vim_option   = opt,
             valid_type   = valid_options[opt].type,
@@ -38,7 +40,20 @@ local function set_option(opt, val)
 end
 
 local function set_var(var, val)
+    if not validate({var = val}, valid_variables) then
+        local params  = {
+            vim_option   = var,
+            valid_type   = valid_variables[var].type,
+            invalid_type = type(var)
+        }
+        vim.notify(sformat(INVALID_OPTION, params),
+            vim.log.levels.ERROR, {title = NOTIFY_TITLE})
+
+        return
+    end
+
     local varname = valid_variables[var].alt or var
+
     vim.g['project_'..varname] = val
 end
 
@@ -69,10 +84,14 @@ M.setup_if_project = function()
     local NOTIFY_STRING = "Found '.project.json'. Loading project options..."
     vim.notify(NOTIFY_STRING, vim.log.levels.INFO, { title = NOTIFY_TITLE })
 
+    local dirs = vim.fn.split(found, '/')
+    table.remove(dirs)
+    vim.g.project_root = '/'..table.concat(dirs, '/')
+
     local lines = {}
     for _,line in ipairs(vim.fn.readfile(found)) do
         -- ignore comments
-        local str, matches = string.gsub(line, '//.*', '')
+        local str, _ = string.gsub(line, '//.*', '')
         table.insert(lines, str)
     end
 
