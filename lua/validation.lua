@@ -40,7 +40,7 @@ function M.validate(tbl, spec)
         return false
     end
 
-    function tbl_to_str(type_of_val, tbl, _lines)
+    local function tbl_to_str(type_of_val, tbl, _lines)
 
         local line  = { }
 
@@ -72,7 +72,7 @@ function M.validate(tbl, spec)
         return fullstring
     end
 
-    function check_type(requested, got, key)
+    local function check_type(requested, got, key)
         if type(requested) == 'string' then
             if requested ~= got then
                 return false
@@ -91,7 +91,7 @@ function M.validate(tbl, spec)
         return true
     end
 
-    function check_expected(expected, got, key, type_of_val)
+    local function check_expected(expected, got, key, type_of_val)
         for i, v in ipairs(expected) do
             if type(v) == 'string' then
                 if v == got then
