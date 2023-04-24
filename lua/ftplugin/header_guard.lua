@@ -24,7 +24,7 @@ local function insert_guard_at_buf(bufnr, skip)
         filename = dir ..'/'..filename
     end
 
-    if project and project ~= dir then
+    if project and string.lower(project) ~= string.lower(dir) then
         if not vim.g.header_guard_prefix_dir_blacklist or
             not vim.tbl_contains(vim.g.header_guard_prefix_dir_blacklist, project) then
             filename = project..'/'..filename
