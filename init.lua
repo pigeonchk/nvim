@@ -48,6 +48,8 @@ autocmd('BufNewFile', {
 -- the directory is one of these
 vim.g.header_guard_prefix_dir_blacklist = { 'src', 'include' }
 
+require('project').setup_if_project()
+
 autocmd('BufNewFile', {
     group = c_fam_augroup,
     pattern = '*.h',
@@ -61,7 +63,37 @@ autocmd('BufNewFile', {
         require('ftplugin.header_guard')(tbl.buf, skip)
     end})
 
-require('project').setup_if_project()
+vim.api.nvim_create_user_command('InsertLicense', function (tbl)
+    require('license').insert_license(tbl.args)
+end, {force = true, nargs=1})
+
+vim.api.nvim_create_user_command('InsertHeaderGuard', function (tbl)
+    local buf = vim.api.nvim_get_current_buf()
+    local skip = 0
+    local line_count = vim.api.nvim_buf_line_count(buf)
+
+    local found_non_comment = false
+
+    while found_non_comment == false do
+        if skip >= line_count then
+            skip = line_count
+            break
+        end
+
+        local lines = vim.api.nvim_buf_get_lines(buf, skip, skip + 5, false)
+
+        for i, line in ipairs(lines) do
+            if not string.match(line, '^%s*//') and not string.match(line, '^%s/?%*') then
+                found_non_comment = true
+                break
+            end
+            skip = skip + 1
+        end
+
+    end
+
+    require('ftplugin.header_guard')(buf, skip)
+end, {force = true})
 
 autocmd('BufWinEnter', {
     group = augroup('TXT_WINOPTIONS', {}),
