@@ -19,45 +19,52 @@ local license_headers = {
         '',
         'You should have received a copy of the GNU General Public License along with',
         'this program. If not, see <https://www.gnu.org/licenses/>.'
+    },
+    ['MPL-2.0'] = {
+        'Copyright (C) %Y <author> (<author_email>)',
+        '',
+        'This Source Code Form is subject to the terms of the Mozilla Public',
+        'License, v. 2.0. If a copy of the MPL was not distributed with this',
+        'file, You can obtain one at https://mozilla.org/MPL/2.0/.'
     }
 }
 
-local license_names = {
-    ['GPL-2.0-or-later']    = 'GNU GENERAL PUBLIC LICENSE Version 2',
-    ['GPL-3.0-or-later']    = 'GNU GENERAL PUBLIC LICENSE Version 3',
-    ['LGPL-2.1-or-later']   = 'GNU LESSER GENERAL PUBLIC LICENSE Version 2.1',
-    ['LGPL-3.0-or-later']   = 'GNU LESSER GENERAL PUBLIC LICENSE Version 3',
-    ['MIT']                 = 'MIT License',
-    ['Unlicense']           = 'This is free and unencumbered software',
+local function get_score_from_pattern(s, pattern)
+    local score = 0
 
-}
+    local pattern_components = vim.fn.split(pattern, '/')
+    local s_components = vim.fn.split(s, '/')
+
+    for i, c in ipairs(pattern_components) do
+        if c ~= '*' and c ~= s_components[i] then
+            break;
+        end
+        score = score + 1
+    end
+
+    return score
+end
+
+local NOTIFY_TITLE = 'license'
 
 local M = { }
 
 M.insert_license = function(license_spdx)
-    local SPEC = { license_spdx = { type = 'string', required = true } }
+    local SPEC = { license_spdx = {
+        type     = 'string',
+        required = true,
+        expects  = vim.tbl_keys(license_headers)
+    }}
 
     if not validate({license_spdx = license_spdx}, SPEC) then
         return nil
     end
 
-    if not license_names[license_spdx] then
-        notify_err('license::insert_license',
-                   'license "'..license_spdx..'" does not exist')
-        return
-    end
-
-    header = license_headers[license_spdx]
-    if not header then
-        notify_err('license::insert_license',
-                   'license "'..license_spdx..'" is missing a standard header')
-        return
-    end
+    local header = license_headers[license_spdx]
 
     local comment_leader = vim.b.license_comment_leader
     if not comment_leader then
-        notify_err('license::insert_license',
-                   'b:license_comment_leader not set for '..vim.bo.filetype)
+        notify_err(NOTIFY_TITLE, 'b:license_comment_leader not set for '..vim.bo.filetype)
         return
     end
 
@@ -94,50 +101,39 @@ M.insert_license = function(license_spdx)
 end
 
 M.detect_and_insert_license = function(tbl)
-    local filenames = { 'LICENSE', 'LICENSE.txt', 'COPYING' }
-    local cwd = vim.fn.getcwd()
-
     if tbl and tbl.event == 'BufNew' and vim.fn.glob(tbl.file) then
         return
     end
 
-    local found
-    for _,file in ipairs(filenames) do
-        found = upsearch(cwd, file)
-        if found then
-            break
-        end
-    end
-
-    if not found then
-        notify_err('license::detect_and_insert_license',
-                  {'LICENSE, LICENSE.txt, or COPYING file was not found during upsearch.',
-                   'Cannot automatically insert license to buffer.'})
+    if not vim.g.project_root then
+        notify_err(NOTIFY_TITLE,
+            "cannot auto-insert license header: no '.project.json' found.")
         return
     end
 
-    -- we assume the name of the license is written in the first two lines
-    local lines = vim.fn.readfile(found, '', 2)
-    local license_name = trim(lines[1])..' '..trim(lines[2])
+    if not vim.g.project_licenses then
+        notify_err(NOTIFY_TITLE,
+            "'licenses' not defined in '.project.json'.")
+        return
+    end
 
-    local license
-    for spdx, name in pairs(license_names) do
-        if string.find(license_name, name) then
-            license = spdx
-            break
+    local file = tbl and tbl.file or vim.fn.expand('%:p')
+
+    local patterns = vim.tbl_keys(vim.g.project_licenses)
+
+    local max_score = 0
+    local current_pattern
+    for _, pattern in ipairs(patterns) do
+        local score = get_score_from_pattern(file, pattern)
+        if score > max_score then
+            max_score = score
+            current_pattern = pattern
         end
     end
 
-    if license then
-        return M.insert_license(license)
-    else
-        local fields = vim.split(found, '/')
-        local filename = fields[#fields]
-        notify_err('license::detect_and_insert_license',
-                  {'Didn\'t find a license in '..filename..' that we know about.',
-                   'Add it to lua/licenses.lua to be able to automatically insert this license.'})
-        return
-    end
+    local license_spdx = vim.g.project_licenses[current_pattern]
+    return M.insert_license(license_spdx)
+
 end
 
 return M
