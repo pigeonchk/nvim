@@ -21,7 +21,7 @@ vim.g.author_email = 'gabrielmanoel13@gmail.com'
 --      |- error.lua        -- an error function that shows a notification
 -- ]]
 
-require('plugins') -- first setup the plugins
+require('plugins')() -- first setup the plugins
 require('colors').colorscheme('gruvbox',
     { background = 'dark' },
     function()

@@ -37,8 +37,6 @@ require('packer').startup(function()
 
     use { 'rcarriga/nvim-notify' }
 
-    vim.notify = require('notify')
-
     -- treesitter is used for a lot of things like:
     --   * syntax highlighting
     --   * folding
@@ -63,77 +61,6 @@ require('packer').startup(function()
     -- Rainbow parentheses powered by tree-sitter.
     -- https://github.com/HiPhish/nvim-ts-rainbow2
     use { 'HiPhish/nvim-ts-rainbow2' }
-
-    local PARSER_INSTALL_DIR = NVIM_DATA_PATH..'/treesitter/parsers/'
-    -- configuration to apply after loading treesitter
-    require('nvim-treesitter.configs').setup {
-        parser_install_dir = PARSER_INSTALL_DIR,
-
-        -- a list of parsers to be available
-        --[[
-        ensure_installed = { 'c', 'lua', 'vim', 'help', 'query',
-        	       'bash', 'cmake', 'comment', 'cpp', 'css',
-        	       'diff', 'html', 'json', 'make', 'regex',
-        	       'typescript' },
-        --]]
-        auto_install = true,
-        -- enable syntax highlighting
-        highlight = { enable = true },
-        -- enable indentation for the = operator
-        indent = { enable = true },
-        -- enable incremental selection based on the named nodes from the grammar
-        incremental_selection = { enable = false },
-        refactor = {
-            highlight_definitions = { enable = true, clear_on_cursor_move = true },
-            smart_rename = { enable = true, keymaps = { smart_rename = "grr" } },
-        },
-        rainbow = {
-            enable = true,
-            disable = {},
-            query = 'rainbow-parens',
-            strategy = require('ts-rainbow.strategy.global')
-        },
-        matchup = {
-            enable = true,
-        },
-    }
-    require('treesitter-context').setup{
-        -- Enable this plugin (Can be enabled/disabled later via commands)
-        enable = true,
-        -- How many lines the window should span. Values <= 0 mean no limit.
-        max_lines = 5,
-        -- Minimum editor window height to enable context. Values <= 0 mean no limit.
-        min_window_height = 0,
-        line_numbers = true,
-        -- Maximum number of lines to collapse for a single context line
-        multiline_threshold = 20,
-        -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
-        trim_scope = 'outer',
-        -- Line used to calculate context. Choices: 'cursor', 'topline'
-        mode = 'cursor',
-        -- Separator between context and content. Should be a single character
-        -- string, like '-'. When separator is set, the context will only show
-        -- up when there are at least 2 lines above cursorline.
-        separator = '─',
-        -- The Z-index of the context window
-        zindex = 20,
-    }
-
-    -- vim.opt.foldmethod     = 'expr'
-    -- vim.opt.foldexpr       = 'nvim_treesitter#foldexpr()'
-	-- only set to 'expr' if there isn't a modeline setting it to marker
-    autocmd({'BufEnter','BufAdd','BufNew','BufNewFile','BufWinEnter'},
-    {
-      group = augroup('TS_FOLD_WORKAROUND', {}),
-      callback = function()
-	if vim.opt.foldmethod:get() ~= 'marker' then
-        vim.opt.foldlevel  = 3
-        vim.opt.foldmethod = 'expr'
-        vim.opt.foldexpr   = 'nvim_treesitter#foldexpr()'
-	end
-      end
-    })
-    vim.opt.runtimepath:append(PARSER_INSTALL_DIR)
 
     -- }}}
 
@@ -212,18 +139,97 @@ require('packer').startup(function()
           }
     }
 
-    -- remove all but the 'default' cheatsheets
-    require('cheatsheet').setup {
-        bundled_cheatsheets =  { 'default' },
-        bundled_plugin_cheatsheets = false,
-    }
-
     use { 'lukas-reineke/virt-column.nvim' }
-
-    require('virt-column').setup()
 
     -- Automatically set up your configuration after cloning packer.nvim
     if packer_bootstrap then
        require('packer').sync()
     end
 end)
+
+return function()
+    vim.notify = require('notify')
+
+    -- Treesitter {{{
+    local PARSER_INSTALL_DIR = NVIM_DATA_PATH..'/treesitter/parsers/'
+    -- configuration to apply after loading treesitter
+    require('nvim-treesitter.configs').setup {
+        parser_install_dir = PARSER_INSTALL_DIR,
+
+        -- a list of parsers to be available
+        --[[
+        ensure_installed = { 'c', 'lua', 'vim', 'help', 'query',
+        	       'bash', 'cmake', 'comment', 'cpp', 'css',
+        	       'diff', 'html', 'json', 'make', 'regex',
+        	       'typescript' },
+        --]]
+        auto_install = true,
+        -- enable syntax highlighting
+        highlight = { enable = true },
+        -- enable indentation for the = operator
+        indent = { enable = true },
+        -- enable incremental selection based on the named nodes from the grammar
+        incremental_selection = { enable = false },
+        refactor = {
+            highlight_definitions = { enable = true, clear_on_cursor_move = true },
+            smart_rename = { enable = true, keymaps = { smart_rename = "grr" } },
+        },
+        rainbow = {
+            enable = true,
+            disable = {},
+            query = 'rainbow-parens',
+            strategy = require('ts-rainbow.strategy.global')
+        },
+        matchup = {
+            enable = true,
+        },
+    }
+
+    require('treesitter-context').setup{
+        -- Enable this plugin (Can be enabled/disabled later via commands)
+        enable = true,
+        -- How many lines the window should span. Values <= 0 mean no limit.
+        max_lines = 5,
+        -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+        min_window_height = 0,
+        line_numbers = true,
+        -- Maximum number of lines to collapse for a single context line
+        multiline_threshold = 20,
+        -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+        trim_scope = 'outer',
+        -- Line used to calculate context. Choices: 'cursor', 'topline'
+        mode = 'cursor',
+        -- Separator between context and content. Should be a single character
+        -- string, like '-'. When separator is set, the context will only show
+        -- up when there are at least 2 lines above cursorline.
+        separator = '─',
+        -- The Z-index of the context window
+        zindex = 20,
+    }
+
+    -- vim.opt.foldmethod     = 'expr'
+    -- vim.opt.foldexpr       = 'nvim_treesitter#foldexpr()'
+	-- only set to 'expr' if there isn't a modeline setting it to marker
+    autocmd({'BufEnter','BufAdd','BufNew','BufNewFile','BufWinEnter'},
+    {
+      group = augroup('TS_FOLD_WORKAROUND', {}),
+      callback = function()
+	if vim.opt.foldmethod:get() ~= 'marker' then
+        vim.opt.foldlevel  = 3
+        vim.opt.foldmethod = 'expr'
+        vim.opt.foldexpr   = 'nvim_treesitter#foldexpr()'
+	end
+      end
+    })
+    vim.opt.runtimepath:append(PARSER_INSTALL_DIR)
+
+    -- }}}
+
+    -- remove all but the 'default' cheatsheets
+    require('cheatsheet').setup {
+        bundled_cheatsheets =  { 'default' },
+        bundled_plugin_cheatsheets = false,
+    }
+
+    require('virt-column').setup()
+end
