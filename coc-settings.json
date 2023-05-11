@@ -44,7 +44,7 @@
         "url": "https://raw.githubusercontent.com/WaywardGame/wayward-schemas/blob/master/schema/lang.schema.json"
 // }}}
     }],
-    "clangd.path": "~/.config/coc/extensions/coc-clangd-data/install/14.0.3/clangd_14.0.3/bin/clangd",
+    "clangd.path": "~/.config/coc/extensions/coc-clangd-data/install/16.0.2/clangd_16.0.2/bin/clangd",
     // run eslint at every file save
     "eslint.run": "onSave",
     "eslint.useESLintClass": true,
