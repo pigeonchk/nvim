@@ -80,6 +80,7 @@ require('packer').startup(function()
         -- website: https://github.com/yuki-yano/fzf-preview.vim
         'coc-fzf-preview',
         'coc-lua',
+        'coc-pylsp',
     }
 
     -- }}}
