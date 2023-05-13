@@ -80,7 +80,7 @@ require('packer').startup(function()
         -- website: https://github.com/yuki-yano/fzf-preview.vim
         'coc-fzf-preview',
         'coc-lua',
-        'coc-pylsp',
+        '@yaegassy/coc-pylsp',
     }
 
     -- }}}
@@ -142,6 +142,20 @@ require('packer').startup(function()
 
     use { 'lukas-reineke/virt-column.nvim' }
 
+    use {
+        "folke/todo-comments.nvim",
+        requires = {
+            {"nvim-lua/plenary.nvim"},
+            {"folke/trouble.nvim"},
+            {"nvim-telescope/telescope.nvim"},
+        },
+        config = function()
+            require("todo-comments").setup {
+                signs = false
+            }
+        end
+    }
+
     -- Automatically set up your configuration after cloning packer.nvim
     if packer_bootstrap then
        require('packer').sync()
@@ -160,9 +174,9 @@ return function()
         -- a list of parsers to be available
         --[[
         ensure_installed = { 'c', 'lua', 'vim', 'help', 'query',
-        	       'bash', 'cmake', 'comment', 'cpp', 'css',
-        	       'diff', 'html', 'json', 'make', 'regex',
-        	       'typescript' },
+                   'bash', 'cmake', 'comment', 'cpp', 'css',
+                   'diff', 'html', 'json', 'make', 'regex',
+                   'typescript' },
         --]]
         auto_install = true,
         -- enable syntax highlighting
@@ -210,16 +224,16 @@ return function()
 
     -- vim.opt.foldmethod     = 'expr'
     -- vim.opt.foldexpr       = 'nvim_treesitter#foldexpr()'
-	-- only set to 'expr' if there isn't a modeline setting it to marker
+    -- only set to 'expr' if there isn't a modeline setting it to marker
     autocmd({'BufEnter','BufAdd','BufNew','BufNewFile','BufWinEnter'},
     {
       group = augroup('TS_FOLD_WORKAROUND', {}),
       callback = function()
-	if vim.opt.foldmethod:get() ~= 'marker' then
-        vim.opt.foldlevel  = 3
-        vim.opt.foldmethod = 'expr'
-        vim.opt.foldexpr   = 'nvim_treesitter#foldexpr()'
-	end
+        if vim.opt.foldmethod:get() ~= 'marker' then
+            vim.opt.foldlevel  = 3
+            vim.opt.foldmethod = 'expr'
+            vim.opt.foldexpr   = 'nvim_treesitter#foldexpr()'
+        end
       end
     })
     vim.opt.runtimepath:append(PARSER_INSTALL_DIR)
