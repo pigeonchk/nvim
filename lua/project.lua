@@ -25,7 +25,6 @@ local INVALID_OPTION = {
 }
 
 local function set_option(opt, val)
-
     if not validate({opt = val}, valid_options) then
         local params  = {
             vim_option   = opt,
@@ -35,7 +34,7 @@ local function set_option(opt, val)
         vim.notify(sformat(INVALID_OPTION, params),
             vim.log.levels.ERROR, {title = NOTIFY_TITLE})
     else
-        vim.go[val] = val
+        vim.go[opt] = val
     end
 end
 
